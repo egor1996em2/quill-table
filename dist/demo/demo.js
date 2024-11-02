@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "1d0ceca631969f7d8861";
+/******/ 	var hotCurrentHash = "9c313ce7dc625e9d9060";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -1056,7 +1056,7 @@ class table_column_tool_TableColumnTool {
     const containerRect = parent.getBoundingClientRect();
     const tableViewRect = this.table.parentNode.getBoundingClientRect();
     this.domNode = document.createElement('div');
-    this.domNode.classList.add('qlbt-col-tool');
+    this.domNode.classList.add('quill-table-col-tool');
     this.updateToolCells();
     parent.appendChild(this.domNode);
     css(this.domNode, {
@@ -1068,10 +1068,10 @@ class table_column_tool_TableColumnTool {
   }
   createToolCell(isClassName = true) {
     const toolCell = document.createElement('div');
-    toolCell.classList.add('qlbt-col-tool-cell');
+    toolCell.classList.add('quill-table-col-tool__cell');
     const resizeHolder = document.createElement('div');
     if (isClassName) {
-      resizeHolder.classList.add('qlbt-col-tool-cell-holder');
+      resizeHolder.classList.add('quill-table-col-tool__cell-holder');
     }
     css(toolCell, {
       height: `${COL_TOOL_CELL_HEIGHT}px`
@@ -1085,7 +1085,7 @@ class table_column_tool_TableColumnTool {
     const tableCols = tableContainer.colGroup().children;
     const tableWidth = tableContainer.children.tail.domNode.clientWidth;
     const cellsNumber = computeCellsNumber(CellsInFirstRow);
-    let existCells = Array.from(this.domNode.querySelectorAll('.qlbt-col-tool-cell'));
+    let existCells = Array.from(this.domNode.querySelectorAll('.quill-table-col-tool__cell'));
     const totalCount = Math.max(cellsNumber, existCells.length);
     for (let index = 0; index < totalCount; index++) {
       let col = tableCols.at(index);
@@ -1120,7 +1120,7 @@ class table_column_tool_TableColumnTool {
   }
   addColCellHolderHandler(cell) {
     const tableContainer = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(this.table);
-    const $holder = cell.querySelector('.qlbt-col-tool-cell-holder');
+    const $holder = cell.querySelector('.quill-table-col-tool__cell-holder');
     let dragging = false;
     let x0 = 0;
     let x = 0;
@@ -1146,7 +1146,7 @@ class table_column_tool_TableColumnTool {
     };
     const handleMouseup = e => {
       e.preventDefault();
-      const existCells = Array.from(this.domNode.querySelectorAll('.qlbt-col-tool-cell'));
+      const existCells = Array.from(this.domNode.querySelectorAll('.quill-table-col-tool__cell'));
       const colIndex = existCells.indexOf(cell);
       const colBlot = tableContainer.colGroup().children.at(colIndex);
       const nextColBlot = colBlot.next;
@@ -1175,7 +1175,7 @@ class table_column_tool_TableColumnTool {
       $helpLine.remove();
       $helpLine = null;
       tableContainer.updateTableWidth();
-      const tableSelection = this.quill.getModule('better-table-plus').tableSelection;
+      const tableSelection = this.quill.getModule('quill-table').tableSelection;
       tableSelection && tableSelection.clearSelection();
       this.updateToolCells();
     };
@@ -1205,7 +1205,7 @@ class table_column_tool_TableColumnTool {
     }
   }
   colToolCells() {
-    return Array.from(this.domNode.querySelectorAll('.qlbt-col-tool-cell'));
+    return Array.from(this.domNode.querySelectorAll('.quill-table-col-tool__cell'));
   }
 }
 function computeCellsNumber(CellsInFirstRow) {
@@ -1522,6 +1522,7 @@ class TableCell extends Container {
   }
 }
 TableCell.blotName = 'table';
+TableCell.className = 'quill-table__cell';
 TableCell.tagName = 'TD';
 class TableRow extends Container {
   checkMerge() {
@@ -1753,7 +1754,7 @@ class table_TableContainer extends Container {
   }
   tableDestroy() {
     const quill = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(this.scroll.domNode.parentNode);
-    const tableModule = quill.getModule('better-table-plus');
+    const tableModule = quill.getModule('quill-table');
     this.remove();
     tableModule.hideTableTools();
     quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
@@ -1989,14 +1990,14 @@ class table_TableContainer extends Container {
   }
 }
 table_TableContainer.blotName = 'table-container';
-table_TableContainer.className = 'quill-better-table';
+table_TableContainer.className = 'quill-table__table';
 table_TableContainer.tagName = 'TABLE';
 class table_TableViewWrapper extends Container {
   constructor(scroll, domNode) {
     super(scroll, domNode);
     const quill = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(scroll.domNode.parentNode);
     domNode.addEventListener('scroll', e => {
-      const tableModule = quill.getModule('better-table-plus');
+      const tableModule = quill.getModule('quill-table');
       if (tableModule.columnTool) {
         tableModule.columnTool.domNode.scrollLeft = e.target.scrollLeft;
       }
@@ -2010,7 +2011,7 @@ class table_TableViewWrapper extends Container {
   }
 }
 table_TableViewWrapper.blotName = 'table-view';
-table_TableViewWrapper.className = 'quill-better-table-wrapper';
+table_TableViewWrapper.className = 'quill-table__wrapper';
 table_TableViewWrapper.tagName = 'DIV';
 table_TableViewWrapper.allowedChildren = [table_TableContainer];
 table_TableContainer.requiredContainer = table_TableViewWrapper;
@@ -2060,8 +2061,8 @@ class table_selection_TableSelection {
     let parent = this.quill.root.parentNode;
     LINE_POSITIONS.forEach(direction => {
       this[direction] = document.createElement('div');
-      this[direction].classList.add('qlbt-selection-line');
-      this[direction].classList.add('qlbt-selection-line-' + direction);
+      this[direction].classList.add('quill-table__selection-line');
+      this[direction].classList.add('quill-table__selection-line-' + direction);
       css(this[direction], {
         position: 'absolute',
         display: 'none',
@@ -2071,7 +2072,7 @@ class table_selection_TableSelection {
     });
   }
   mouseDownHandler(e) {
-    if (e.button !== 0 || !e.target.closest('.quill-better-table')) return;
+    if (e.button !== 0 || !e.target.closest('.quill-table__table')) return;
     this.quill.root.addEventListener('mousemove', mouseMoveHandler, false);
     this.quill.root.addEventListener('mouseup', mouseUpHandler, false);
     const self = this;
@@ -2083,7 +2084,7 @@ class table_selection_TableSelection {
     this.selectedTds = this.computeSelectedTds();
     this.repositionHelpLines();
     function mouseMoveHandler(e) {
-      if (e.button !== 0 || !e.target.closest('.quill-better-table')) return;
+      if (e.button !== 0 || !e.target.closest('.quill-table__table')) return;
       const endTd = e.target.closest('td[data-row]');
       const endTdRect = getRelativeRect(endTd.getBoundingClientRect(), self.quill.root.parentNode);
       self.boundary = computeBoundaryFromRects(startTdRect, endTdRect);
@@ -2418,7 +2419,7 @@ const MENU_ITEMS_DEFAULT = {
     text: 'Delete table',
     iconSrc: icon_operation_9_default.a,
     handler() {
-      const betterTableModule = this.quill.getModule('better-table-plus');
+      const betterTableModule = this.quill.getModule('quill-table');
       const tableContainer = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(this.table);
       betterTableModule.hideTableTools();
       tableContainer.remove();
@@ -2428,7 +2429,7 @@ const MENU_ITEMS_DEFAULT = {
 };
 class table_operation_menu_TableOperationMenu {
   constructor(params, quill, options) {
-    const betterTableModule = quill.getModule('better-table-plus');
+    const betterTableModule = quill.getModule('quill-table');
     this.tableSelection = betterTableModule.tableSelection;
     this.table = params.table;
     this.quill = quill;
@@ -2458,7 +2459,7 @@ class table_operation_menu_TableOperationMenu {
     top
   }) {
     this.domNode = document.createElement('div');
-    this.domNode.classList.add('qlbt-operation-menu');
+    this.domNode.classList.add('quill-table-operation-menu');
     css(this.domNode, {
       position: 'absolute',
       left: `${left}px`,
@@ -2485,14 +2486,14 @@ class table_operation_menu_TableOperationMenu {
     // create dividing line
     function dividingCreator() {
       const dividing = document.createElement('div');
-      dividing.classList.add('qlbt-operation-menu-dividing');
+      dividing.classList.add('quill-table-operation-menu__divider');
       return dividing;
     }
 
     // create subtitle for menu
     function subTitleCreator(title) {
       const subTitle = document.createElement('div');
-      subTitle.classList.add('qlbt-operation-menu-subtitle');
+      subTitle.classList.add('quill-table-operation-menu__subtitle');
       subTitle.innerText = title;
       return subTitle;
     }
@@ -2500,14 +2501,14 @@ class table_operation_menu_TableOperationMenu {
   colorsItemCreator(colors) {
     const self = this;
     const node = document.createElement('div');
-    node.classList.add('qlbt-operation-color-picker');
+    node.classList.add('quill-table-color-picker');
     colors.forEach(color => {
       let colorBox = colorBoxCreator(color);
       node.appendChild(colorBox);
     });
     function colorBoxCreator(color) {
       const box = document.createElement('div');
-      box.classList.add('qlbt-operation-color-picker-item');
+      box.classList.add('quill-table-color-picker__item');
       box.setAttribute('data-color', color);
       box.style.backgroundColor = color;
       box.addEventListener('click', function () {
@@ -2528,12 +2529,12 @@ class table_operation_menu_TableOperationMenu {
     handler
   }) {
     const node = document.createElement('div');
-    node.classList.add('qlbt-operation-menu-item');
+    node.classList.add('quill-table-operation-menu__item');
     const iconSpan = document.createElement('span');
-    iconSpan.classList.add('qlbt-operation-menu-icon');
+    iconSpan.classList.add('quill-table-operation-menu__icon');
     iconSpan.innerHTML = iconSrc;
     const textSpan = document.createElement('span');
-    textSpan.classList.add('qlbt-operation-menu-text');
+    textSpan.classList.add('quill-table-operation-menu__text');
     textSpan.innerText = text;
     node.appendChild(iconSpan);
     node.appendChild(textSpan);
@@ -2771,13 +2772,13 @@ class quill_table_BetterTablePlus extends Module {
   constructor(quill, options) {
     super(quill, options);
 
-    // handle click on quill-better-table
+    // handle click on quill-table__table
     this.quill.root.addEventListener('click', evt => {
       // bugfix: evt.path is undefined in Safari, FF, Micro Edge
       const path = getEventComposedPath(evt);
       if (!path || path.length <= 0) return;
       const tableNode = path.filter(node => {
-        return node.tagName && node.tagName.toUpperCase() === 'TABLE' && node.classList.contains('quill-better-table');
+        return node.tagName && node.tagName.toUpperCase() === 'TABLE' && node.classList.contains('quill-table__table');
       })[0];
       if (tableNode) {
         // current table clicked
@@ -2791,7 +2792,7 @@ class quill_table_BetterTablePlus extends Module {
       }
     }, false);
 
-    // handle right click on quill-better-table
+    // handle right click on quill-table__table
     this.quill.root.addEventListener('contextmenu', evt => {
       if (!this.table) return true;
       evt.preventDefault();
@@ -2800,7 +2801,7 @@ class quill_table_BetterTablePlus extends Module {
       const path = getEventComposedPath(evt);
       if (!path || path.length <= 0) return;
       const tableNode = path.filter(node => {
-        return node.tagName && node.tagName.toUpperCase() === 'TABLE' && node.classList.contains('quill-better-table');
+        return node.tagName && node.tagName.toUpperCase() === 'TABLE' && node.classList.contains('quill-table__table');
       })[0];
       const rowNode = path.filter(node => {
         return node.tagName && node.tagName.toUpperCase() === 'TR' && node.getAttribute('data-row');
@@ -3124,20 +3125,20 @@ function isInTableCell(current) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _src_quill_table__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(10);
-/* harmony import */ var src_assets_quill_table_less__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(11);
-/* harmony import */ var src_assets_quill_table_less__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(src_assets_quill_table_less__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var src_assets_quill_table_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(11);
+/* harmony import */ var src_assets_quill_table_css__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(src_assets_quill_table_css__WEBPACK_IMPORTED_MODULE_1__);
 
 // import better-table styles file
 
 Quill.register({
-  'modules/better-table-plus': _src_quill_table__WEBPACK_IMPORTED_MODULE_0__["default"]
+  'modules/quill-table': _src_quill_table__WEBPACK_IMPORTED_MODULE_0__["default"]
 }, true);
 window.onload = () => {
   const quill = new Quill('#editor-wrapper', {
     theme: 'snow',
     modules: {
       table: false,
-      'better-table-plus': {
+      'quill-table': {
         operationMenu: {
           items: {
             unmergeCells: {
@@ -3154,7 +3155,7 @@ window.onload = () => {
       }
     }
   });
-  let tableModule = quill.getModule('better-table-plus');
+  let tableModule = quill.getModule('quill-table');
   document.body.querySelector('#insert-table').onclick = () => {
     tableModule.insertTable(3, 3);
   };
