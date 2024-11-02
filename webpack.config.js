@@ -45,10 +45,10 @@ module.exports = (env, argv) => {
         },
 
         externals: {
-            quill: {
-                commonjs: 'quill',
-                commonjs2: 'quill',
-                amd: 'quill',
+            'quill/core': {
+                commonjs: 'quill/core',
+                commonjs2: 'quill/core',
+                amd: 'quill/core',
                 root: 'Quill',
             },
         },
