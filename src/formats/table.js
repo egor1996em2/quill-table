@@ -103,7 +103,7 @@ class TableCellLine extends Block {
 }
 
 TableCellLine.blotName = 'table-cell-line';
-TableCellLine.className = 'qlbt-cell-line';
+TableCellLine.className = 'quill-table__cell-line';
 TableCellLine.tagName = 'P';
 
 class TableCell extends Container {
