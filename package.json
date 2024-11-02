@@ -1,5 +1,5 @@
 {
-    "name": "quill-table",
+    "name": "@tilda/quill-table",
     "version": "1.0.0",
     "description": "Модуль редактора Quill с поддержкой таблиц и функций их редактирования",
     "main": "dist/quill-table.js",
@@ -11,6 +11,10 @@
         "lint": "eslint . && prettier . --check",
         "lint:fix": "eslint --fix js/**/*.js && prettier . --write"
     },
+	"exports": {
+		".": "./dist/quill-table.js",
+		"./style.css": "./dist/quill-table.css"
+	},
     "repository": {
         "type": "git",
         "url": "git+https://github.com/egor1996em2/quill-table.git"
