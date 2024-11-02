@@ -21,11 +21,12 @@ import {
 } from './formats/table';
 import {getColToolCellIndexByBoundary, getColToolCellIndexesByBoundary} from 'src/utils/table-util';
 import {ERROR_LIMIT} from 'src/contants';
+import TableContextMenuButton from './modules/table-context-menu-button';
 
 const Module = Quill.import('core/module');
 const Delta = Quill.import('delta');
 
-class BetterTablePlus extends Module {
+class QuillTable extends Module {
     static register() {
         Quill.register(TableCol, true);
         Quill.register(TableColGroup, true);
@@ -42,24 +43,52 @@ class BetterTablePlus extends Module {
     constructor(quill, options) {
         super(quill, options);
 
-        // handle click on quill-better-table
+        // handle click on quill-table__table
         this.quill.root.addEventListener(
             'click',
             evt => {
                 // bugfix: evt.path is undefined in Safari, FF, Micro Edge
                 const path = getEventComposedPath(evt);
-
                 if (!path || path.length <= 0) return;
 
-                const tableNode = path.filter(node => {
-                    return (
-                        node.tagName &&
-                        node.tagName.toUpperCase() === 'TABLE' &&
-                        node.classList.contains('quill-better-table')
-                    );
-                })[0];
+                const {tableNode, rowNode, cellNode} = path.reduce(
+                    (acc, node) => {
+                        if (!node.tagName) {
+                            return acc;
+                        }
+
+                        const tagName = node.tagName.toUpperCase();
+
+                        if (tagName === 'TABLE' && node.classList.contains('quill-table__table')) {
+                            acc.tableNode = node;
+                            return acc;
+                        }
+
+                        if (tagName === 'TR') {
+                            acc.rowNode = node;
+                        }
+
+                        // if multi columns selected
+                        if ((tagName === 'TBODY' || acc.rowNode) && !acc.cellNode) {
+                            const pointerElement = document.elementFromPoint(evt.x, evt.y);
+                            if (pointerElement) {
+                                acc.cellNode = pointerElement.closest('.quill-table__cell');
+                            }
+                        }
+
+                        if (node.classList.contains('quill-table__cell')) {
+                            acc.cellNode = node;
+                        }
+
+                        return acc;
+                    },
+                    {cellNode: null, rowNode: null, tableNode: null}
+                );
 
                 if (tableNode) {
+                    if (cellNode) {
+                        this.showContextMenuButton(tableNode, rowNode, cellNode);
+                    }
                     // current table clicked
                     if (this.table === tableNode) return;
                     // other table clicked
@@ -68,12 +97,13 @@ class BetterTablePlus extends Module {
                 } else if (this.table) {
                     // other clicked
                     this.hideTableTools();
+                    this.hideContextMenuButton();
                 }
             },
             false
         );
 
-        // handle right click on quill-better-table
+        // handle right click on quill-table__table
         this.quill.root.addEventListener(
             'contextmenu',
             evt => {
@@ -88,7 +118,7 @@ class BetterTablePlus extends Module {
                     return (
                         node.tagName &&
                         node.tagName.toUpperCase() === 'TABLE' &&
-                        node.classList.contains('quill-better-table')
+                        node.classList.contains('quill-table__table')
                     );
                 })[0];
 
@@ -111,21 +141,7 @@ class BetterTablePlus extends Module {
                     );
                 }
 
-                if (this.tableOperationMenu) this.tableOperationMenu = this.tableOperationMenu.destroy();
-
-                if (tableNode) {
-                    this.tableOperationMenu = new TableOperationMenu(
-                        {
-                            table: tableNode,
-                            row: rowNode,
-                            cell: cellNode,
-                            left: evt.pageX,
-                            top: evt.pageY,
-                        },
-                        quill,
-                        options.operationMenu
-                    );
-                }
+                this.showTableOperationMenu(tableNode, rowNode, cellNode, evt);
             },
             false
         );
@@ -133,24 +149,21 @@ class BetterTablePlus extends Module {
         // add keyboard binding：Backspace
         // prevent user hits backspace to delete table cell
         // const KeyBoard = quill.getModule('keyboard');
-        quill.keyboard.addBinding({key: 'Backspace'}, {}, function (range, context) {
-            if (range.index === 0 || this.quill.getLength() <= 1) return true;
-            const [line] = this.quill.getLine(range.index);
-            if (context.offset === 0) {
-                const [prev] = this.quill.getLine(range.index - 1);
-                if (prev != null) {
-                    if (prev.statics.blotName === 'table-cell-line' && line.statics.blotName !== 'table-cell-line')
-                        return false;
-                }
-            }
-            return true;
-        });
+        quill.keyboard.addBinding({key: 'Backspace'}, {}, (range, context) =>
+            this.tableDeletionProtection(range, context)
+        );
+        quill.keyboard.addBinding({key: 'Backspace', shiftKey: true}, {}, (range, context) =>
+            this.tableDeletionProtection(range, context)
+        );
         // since only one matched bindings callback will excute.
         // expected my binding callback excute first
         // I changed the order of binding callbacks
-        let thisBinding = quill.keyboard.bindings.Backspace.pop();
-        quill.keyboard.bindings.Backspace.splice(0, 1, thisBinding);
-
+        let thisBindings = quill.keyboard.bindings.Backspace.slice(
+            quill.keyboard.bindings.Backspace.length - 2,
+            quill.keyboard.bindings.Backspace.length
+        );
+        quill.keyboard.bindings.Backspace.splice(0, 2, ...thisBindings);
+        quill.keyboard.bindings.Backspace.splice(quill.keyboard.bindings.Backspace.length - 2, 2);
         // add Matchers to match and render quill-better-table for initialization
         // or pasting
         quill.clipboard.addMatcher('td', matchTableCell);
@@ -162,6 +175,29 @@ class BetterTablePlus extends Module {
         quill.clipboard.matchers = quill.clipboard.matchers.filter(matcher => {
             return matcher[0] !== 'tr';
         });
+
+        this.quill.on('editor-change', () => {
+            this.hideContextMenuButton();
+        });
+
+        window.addEventListener(
+            'resize',
+            () => {
+                if (this.columnTool) {
+                    this.columnTool.updateToolCells();
+                    this.columnTool.updateToolWidth();
+                }
+
+                if (this.contextMenuButton) {
+                    this.contextMenuButton.calculateButtonPosition();
+                }
+
+                if (this.tableSelection) {
+                    this.tableSelection.refreshHelpLinesPosition();
+                }
+            },
+            false
+        );
     }
 
     getTable(range = this.quill.getSelection()) {
@@ -326,9 +362,73 @@ class BetterTablePlus extends Module {
         this.tableOperationMenu = null;
         this.table = null;
     }
+
+    showTableOperationMenu(tableNode, rowNode, cellNode, evt) {
+        if (this.tableOperationMenu) {
+            this.tableOperationMenu = this.tableOperationMenu.destroy();
+        }
+
+        if (tableNode) {
+            setTimeout(() => {
+                this.tableOperationMenu = new TableOperationMenu(
+                    {
+                        table: tableNode,
+                        row: rowNode,
+                        cell: cellNode,
+                        evt,
+                    },
+                    this.quill,
+                    this.options.operationMenu
+                );
+            }, 0);
+        }
+    }
+
+    showContextMenuButton(tableNode, rowNode, cellNode) {
+        if (this.contextMenuButton) {
+            this.hideContextMenuButton();
+        }
+
+        this.contextMenuButton = new TableContextMenuButton(this.quill, {
+            tableNode,
+            rowNode,
+            cellNode,
+        });
+    }
+
+    hideContextMenuButton() {
+        if (!this.contextMenuButton) {
+            return;
+        }
+
+        this.contextMenuButton = this.contextMenuButton.destroy();
+    }
+
+    tableDeletionProtection(range, context) {
+        if (range.index === 0 || this.quill.getLength() <= 1) return true;
+
+        const [line] = this.quill.getLine(range.index);
+
+        if (context.event.shiftKey && line.statics.blotName === 'table-cell-line') {
+            return false;
+        }
+
+        if (this.tableSelection && this.tableSelection.selectedTds && this.tableSelection.selectedTds.length > 1) {
+            return false;
+        }
+
+        if (context.offset === 0) {
+            const [prev] = this.quill.getLine(range.index - 1);
+            if (prev != null) {
+                if (prev.statics.blotName === 'table-cell-line' && line.statics.blotName !== 'table-cell-line')
+                    return false;
+            }
+        }
+        return true;
+    }
 }
 
-BetterTablePlus.keyboardBindings = {
+QuillTable.keyboardBindings = {
     'table-cell-line backspace': {
         key: 'Backspace',
         format: ['table-cell-line'],
@@ -417,6 +517,17 @@ BetterTablePlus.keyboardBindings = {
     },
 };
 
+QuillTable.requiredTableFormats = [
+    'table',
+    'table-cell-line',
+    'table-row',
+    'table-body',
+    'table-col',
+    'table-col-group',
+    'table-container',
+    'table-view',
+];
+
 function makeTableArrowHandler(up) {
     return {
         key: up ? 'ArrowUp' : 'ArrowDown',
@@ -469,12 +580,8 @@ function makeTableArrowHandler(up) {
     };
 }
 
-function isTableCell(blot) {
-    return blot.statics.blotName === TableCell.blotName;
-}
-
 function isInTableCell(current) {
-    return current && current.parent ? (isTableCell(current.parent) ? true : isInTableCell(current.parent)) : false;
+    return current.domNode.closest('table');
 }
 
-export default BetterTablePlus;
+export default QuillTable;

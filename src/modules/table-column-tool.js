@@ -9,33 +9,26 @@ export default class TableColumnTool {
         this.quill = quill;
         this.options = options;
         this.domNode = null;
+        this.isTouchDevice = this.checkTouchDevice();
 
         this.initColTool();
     }
 
     initColTool() {
         const parent = this.quill.root.parentNode;
-        const containerRect = parent.getBoundingClientRect();
-        const tableViewRect = this.table.parentNode.getBoundingClientRect();
-
         this.domNode = document.createElement('div');
-        this.domNode.classList.add('qlbt-col-tool');
+        this.domNode.classList.add('quill-table-col-tool');
         this.updateToolCells();
         parent.appendChild(this.domNode);
-        css(this.domNode, {
-            width: `${tableViewRect.width}px`,
-            height: `${COL_TOOL_HEIGHT}px`,
-            left: `${tableViewRect.left - containerRect.left + parent.scrollLeft}px`,
-            top: `${tableViewRect.top - containerRect.top + parent.scrollTop - COL_TOOL_HEIGHT - 5}px`,
-        });
+        this.updateToolWidth();
     }
 
     createToolCell(isClassName = true) {
         const toolCell = document.createElement('div');
-        toolCell.classList.add('qlbt-col-tool-cell');
+        toolCell.classList.add('quill-table-col-tool__cell');
         const resizeHolder = document.createElement('div');
         if (isClassName) {
-            resizeHolder.classList.add('qlbt-col-tool-cell-holder');
+            this.setCellResizeHolderClass(resizeHolder);
         }
         css(toolCell, {
             height: `${COL_TOOL_CELL_HEIGHT}px`,
@@ -44,43 +37,76 @@ export default class TableColumnTool {
         return toolCell;
     }
 
+    setCellResizeHolderClass(holder) {
+        holder.classList.add('quill-table-col-tool__cell-holder');
+    }
+
+    updateToolWidth() {
+        const tableViewRect = this.table.parentNode.getBoundingClientRect();
+        const parent = this.quill.root.parentNode;
+        css(this.domNode, {
+            width: `${tableViewRect.width}px`,
+            height: '12px',
+            left: `${this.table.offsetLeft + parent.scrollLeft}px`,
+            top: `${this.table.offsetTop + parent.scrollTop - COL_TOOL_HEIGHT + 2}px`,
+        });
+    }
+
     updateToolCells() {
-        const tableContainer = Quill.find(this.table);
-        const CellsInFirstRow = tableContainer.children.tail.children.head.children;
-        const tableCols = tableContainer.colGroup().children;
+        return new Promise(resolve => {
+            setTimeout(() => {
+                const tableContainer = Quill.find(this.table);
+                const CellsInFirstRow = tableContainer.children.tail.children.head.children;
+                const tableCols = tableContainer.colGroup().children;
 
-        const tableWidth = tableContainer.children.tail.domNode.clientWidth;
+                const tableWidth = tableContainer.children.tail.domNode.clientWidth;
 
-        const cellsNumber = computeCellsNumber(CellsInFirstRow);
-        let existCells = Array.from(this.domNode.querySelectorAll('.qlbt-col-tool-cell'));
+                const cellsNumber = computeCellsNumber(CellsInFirstRow);
+                let existCells = Array.from(this.domNode.querySelectorAll('.quill-table-col-tool__cell'));
+                const totalCount = Math.max(cellsNumber, existCells.length);
+                for (let index = 0; index < totalCount; index++) {
+                    let col = tableCols.at(index);
+                    let colWidth = col && col.attributes.domNode.clientWidth;
+                    // if cell already exist
+                    let toolCell = null;
+                    if (!existCells[index]) {
+                        toolCell = this.createToolCell(index + 1 !== totalCount);
+                        this.domNode.appendChild(toolCell);
+                        this.addColCellHolderHandler(toolCell);
+                        // set tool cell width
+                        const colWidthRate = (colWidth / tableWidth) * 100;
+                        css(toolCell, {
+                            width: `${colWidthRate}%`,
+                        });
+                    } else if (existCells[index] && index >= cellsNumber) {
+                        existCells[index].remove();
+                    } else {
+                        toolCell = existCells[index];
+                        const colWidthRate = (colWidth / tableWidth) * 100;
 
-        const totalCount = Math.max(cellsNumber, existCells.length);
-        for (let index = 0; index < totalCount; index++) {
-            let col = tableCols.at(index);
-            let colWidth = col && col.attributes.domNode.clientWidth;
-            // if cell already exist
-            let toolCell = null;
-            if (!existCells[index]) {
-                toolCell = this.createToolCell(index + 1 !== totalCount);
-                this.domNode.appendChild(toolCell);
-                this.addColCellHolderHandler(toolCell);
-                // set tool cell min-width
-                const colWidthRate = ((colWidth / tableWidth) * 100).toFixed(2);
-                css(toolCell, {
-                    'min-width': `${colWidthRate}%`,
-                });
-            } else if (existCells[index] && index >= cellsNumber) {
-                existCells[index].remove();
-            } else {
-                toolCell = existCells[index];
-                const colWidthRate = ((colWidth / tableWidth) * 100).toFixed(2);
+                        // set tool cell width
+                        css(toolCell, {
+                            width: `${colWidthRate}%`,
+                        });
 
-                // set tool cell min-width
-                css(toolCell, {
-                    'min-width': `${colWidthRate}%`,
-                });
-            }
-        }
+                        // if cell was last cell
+                        // add them resize holder
+                        const orderByIndex = index + 1;
+                        if (orderByIndex === existCells.length && orderByIndex < totalCount) {
+                            const holderElement = toolCell.querySelector('div');
+
+                            if (!holderElement) {
+                                continue;
+                            }
+
+                            this.setCellResizeHolderClass(holderElement);
+                            this.addColCellHolderHandler(toolCell);
+                        }
+                    }
+                }
+                resolve();
+            }, 0);
+        });
     }
 
     destroy() {
@@ -90,7 +116,7 @@ export default class TableColumnTool {
 
     addColCellHolderHandler(cell) {
         const tableContainer = Quill.find(this.table);
-        const $holder = cell.querySelector('.qlbt-col-tool-cell-holder');
+        const $holder = cell.querySelector('.quill-table-col-tool__cell-holder');
         let dragging = false;
         let x0 = 0;
         let x = 0;
@@ -105,7 +131,7 @@ export default class TableColumnTool {
             e.preventDefault();
 
             if (dragging) {
-                x = e.clientX;
+                x = this.getClientXFromEvent(e);
 
                 if (width0 + x - x0 >= CELL_MIN_WIDTH) {
                     delta = x - x0;
@@ -121,7 +147,7 @@ export default class TableColumnTool {
 
         const handleMouseup = e => {
             e.preventDefault();
-            const existCells = Array.from(this.domNode.querySelectorAll('.qlbt-col-tool-cell'));
+            const existCells = Array.from(this.domNode.querySelectorAll('.quill-table-col-tool__cell'));
             const colIndex = existCells.indexOf(cell);
             const colBlot = tableContainer.colGroup().children.at(colIndex);
             const nextColBlot = colBlot.next;
@@ -131,8 +157,6 @@ export default class TableColumnTool {
             if (dragging) {
                 colBlot.format('width', width0 + delta);
                 nextColBlot.format('width', nextCellWidth - delta);
-                css(cell, {'min-width': `${width0 + delta}px`});
-                css(nextCell, {'min-width': `${nextCellWidth - delta}px`});
 
                 x0 = 0;
                 x = 0;
@@ -144,6 +168,12 @@ export default class TableColumnTool {
 
             document.removeEventListener('mousemove', handleDrag, false);
             document.removeEventListener('mouseup', handleMouseup, false);
+
+            if (this.isTouchDevice) {
+                document.removeEventListener('touchmove', handleDrag, false);
+                document.removeEventListener('touchend', handleMouseup, false);
+            }
+
             tableRect = {};
             cellRect = {};
             $helpLine.remove();
@@ -158,6 +188,11 @@ export default class TableColumnTool {
         const handleMousedown = e => {
             document.addEventListener('mousemove', handleDrag, false);
             document.addEventListener('mouseup', handleMouseup, false);
+
+            if (this.isTouchDevice) {
+                document.addEventListener('touchmove', handleDrag, false);
+                document.addEventListener('touchend', handleMouseup, false);
+            }
 
             tableRect = this.table.getBoundingClientRect();
             cellRect = cell.getBoundingClientRect();
@@ -174,17 +209,28 @@ export default class TableColumnTool {
 
             document.body.appendChild($helpLine);
             dragging = true;
-            x0 = e.clientX;
+            x0 = this.getClientXFromEvent(e);
             width0 = cellRect.width;
             $holder.classList.add('dragging');
         };
         if ($holder !== null) {
             $holder.addEventListener('mousedown', handleMousedown, false);
+            if (this.isTouchDevice) {
+                $holder.addEventListener('touchstart', handleMousedown, false);
+            }
         }
     }
 
     colToolCells() {
-        return Array.from(this.domNode.querySelectorAll('.qlbt-col-tool-cell'));
+        return Array.from(this.domNode.querySelectorAll('.quill-table-col-tool__cell'));
+    }
+
+    checkTouchDevice() {
+        return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+    }
+
+    getClientXFromEvent(e) {
+        return this.isTouchDevice ? e.touches[0].clientX : e.clientX;
     }
 }
 

@@ -15,7 +15,7 @@ module.exports = (env, argv) => {
     } else {
         entry = {
             'quill-table.js': ['./src/quill-table.js'],
-            'quill-table': './src/assets/quill-table.less',
+            'quill-table': './src/assets/quill-table.css',
             'demo/demo.js': './demo/js/demo.js',
         };
         minimize = false;
@@ -41,7 +41,7 @@ module.exports = (env, argv) => {
                 src: path.resolve(__dirname, './src'),
                 dist: path.resolve(__dirname, './dist'),
             },
-            extensions: ['.js', '.less', '.html'],
+            extensions: ['.js', '.css', '.html'],
         },
 
         externals: {
@@ -81,12 +81,11 @@ module.exports = (env, argv) => {
                 },
 
                 {
-                    test: /\.less$/,
+                    test: /\.css$/,
                     use: [
                         // fallback to style-loader in development
                         !isProduction ? 'style-loader' : MiniCssExtractPlugin.loader,
                         'css-loader',
-                        'less-loader',
                     ],
                 },
 
@@ -121,7 +120,7 @@ module.exports = (env, argv) => {
 
         plugins: [
             new HtmlWebpackPlugin({
-                title: 'quill-better-table',
+                title: 'quill-table',
                 template: './demo/demo.html',
                 filename: 'demo/demo.html',
             }),
