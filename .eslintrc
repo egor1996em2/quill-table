@@ -1,0 +1,48 @@
+{
+    "extends": "eslint:recommended",
+    "env": {
+        "browser": true,
+        "node": true,
+        "mocha": true,
+        "es6": true
+    },
+    "parser": "babel-eslint",
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "forOf": true,
+            "es6": true,
+            "experimentalObjectRestSpread": true
+        }
+    },
+	"globals": {
+		"Quill": true
+	},
+    "rules": {
+        "semi": "error",
+        "no-console": "warn",
+        "no-redeclare": "off",
+        "no-lonely-if": "error",
+        "no-unused-vars": [
+            "error",
+            {
+                "vars": "local"
+            }
+        ],
+        "no-empty": "off",
+        "valid-typeof": [
+            "error",
+            {
+                "requireStringLiterals": true
+            }
+        ],
+        "quotes": [
+            "error",
+            "single",
+            {
+                "avoidEscape": true
+            }
+        ]
+    }
+}
