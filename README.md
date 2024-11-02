@@ -1,5 +1,5 @@
 # Описание
-`quill-table` - это расширенная версия плагина таблиц для редактора `Quill`, предоставляющая полный набор функций для редактрирования таблиц. Позволяет пользователю создавать, редактировать и форматировать таблицы.
+`@tilda/quill-table` - это расширенная версия плагина таблиц для редактора `Quill`, предоставляющая полный набор функций для редактрирования таблиц. Позволяет пользователю создавать, редактировать и форматировать таблицы.
 
 Этот пакет базируется на последней доступной версии оригинального пакета `quill-better-table`, с добавлением нескольких новых функций и исправлением некоего количества извеснтных проблем.
 
@@ -16,18 +16,21 @@
 Добавить `Quill` и файлы стилей
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/quill/2.0.0-dev.3/quill.min.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quill/2.0.2/quill.min.js" type="text/javascript"></script>
 ```
 
 ```html
-<link href="https://cdnjs.cloudflare.com/ajax/libs/quill/2.0.0-dev.3/quill.snow.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/quill/2.0.2/quill.snow.min.css" rel="stylesheet" />
 <link href="https://unpkg.com/quill-better-table-plus@0.1.3/dist/quill-better-table-plus.css" rel="stylesheet" />
 ```
 
 ## ES6
 
 ```javascript
-import QuillTable from 'quill-table';
+// подклбчаем библиотеку
+import QuillTable from '@tilda/quill-table';
+// подключаем стили библиотеки
+import '@tilda/quill-table/style.css';
 
 Quill.register(
     {
