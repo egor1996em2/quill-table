@@ -1,6 +1,6 @@
 import QuillTable from '../../src/quill-table';
 // import better-table styles file
-import 'src/assets/quill-table.less';
+import 'src/assets/quill-table.css';
 
 Quill.register(
     {

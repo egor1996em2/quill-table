@@ -42,7 +42,7 @@ class BetterTablePlus extends Module {
     constructor(quill, options) {
         super(quill, options);
 
-        // handle click on quill-better-table
+        // handle click on quill-table__table
         this.quill.root.addEventListener(
             'click',
             evt => {
@@ -55,7 +55,7 @@ class BetterTablePlus extends Module {
                     return (
                         node.tagName &&
                         node.tagName.toUpperCase() === 'TABLE' &&
-                        node.classList.contains('quill-better-table')
+                        node.classList.contains('quill-table__table')
                     );
                 })[0];
 
@@ -73,7 +73,7 @@ class BetterTablePlus extends Module {
             false
         );
 
-        // handle right click on quill-better-table
+        // handle right click on quill-table__table
         this.quill.root.addEventListener(
             'contextmenu',
             evt => {
@@ -88,7 +88,7 @@ class BetterTablePlus extends Module {
                     return (
                         node.tagName &&
                         node.tagName.toUpperCase() === 'TABLE' &&
-                        node.classList.contains('quill-better-table')
+                        node.classList.contains('quill-table__table')
                     );
                 })[0];
 

@@ -28,8 +28,8 @@ export default class TableSelection {
         let parent = this.quill.root.parentNode;
         LINE_POSITIONS.forEach(direction => {
             this[direction] = document.createElement('div');
-            this[direction].classList.add('qlbt-selection-line');
-            this[direction].classList.add('qlbt-selection-line-' + direction);
+            this[direction].classList.add('quill-table__selection-line');
+            this[direction].classList.add('quill-table__selection-line-' + direction);
             css(this[direction], {
                 position: 'absolute',
                 display: 'none',
@@ -40,7 +40,7 @@ export default class TableSelection {
     }
 
     mouseDownHandler(e) {
-        if (e.button !== 0 || !e.target.closest('.quill-better-table')) return;
+        if (e.button !== 0 || !e.target.closest('.quill-table__table')) return;
         this.quill.root.addEventListener('mousemove', mouseMoveHandler, false);
         this.quill.root.addEventListener('mouseup', mouseUpHandler, false);
 
@@ -54,7 +54,7 @@ export default class TableSelection {
         this.repositionHelpLines();
 
         function mouseMoveHandler(e) {
-            if (e.button !== 0 || !e.target.closest('.quill-better-table')) return;
+            if (e.button !== 0 || !e.target.closest('.quill-table__table')) return;
             const endTd = e.target.closest('td[data-row]');
             const endTdRect = getRelativeRect(endTd.getBoundingClientRect(), self.quill.root.parentNode);
             self.boundary = computeBoundaryFromRects(startTdRect, endTdRect);

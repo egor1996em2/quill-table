@@ -19,7 +19,7 @@ export default class TableColumnTool {
         const tableViewRect = this.table.parentNode.getBoundingClientRect();
 
         this.domNode = document.createElement('div');
-        this.domNode.classList.add('qlbt-col-tool');
+        this.domNode.classList.add('quill-table-col-tool');
         this.updateToolCells();
         parent.appendChild(this.domNode);
         css(this.domNode, {
@@ -32,10 +32,10 @@ export default class TableColumnTool {
 
     createToolCell(isClassName = true) {
         const toolCell = document.createElement('div');
-        toolCell.classList.add('qlbt-col-tool-cell');
+        toolCell.classList.add('quill-table-col-tool__cell');
         const resizeHolder = document.createElement('div');
         if (isClassName) {
-            resizeHolder.classList.add('qlbt-col-tool-cell-holder');
+            resizeHolder.classList.add('quill-table-col-tool__cell-holder');
         }
         css(toolCell, {
             height: `${COL_TOOL_CELL_HEIGHT}px`,
@@ -52,7 +52,7 @@ export default class TableColumnTool {
         const tableWidth = tableContainer.children.tail.domNode.clientWidth;
 
         const cellsNumber = computeCellsNumber(CellsInFirstRow);
-        let existCells = Array.from(this.domNode.querySelectorAll('.qlbt-col-tool-cell'));
+        let existCells = Array.from(this.domNode.querySelectorAll('.quill-table-col-tool__cell'));
 
         const totalCount = Math.max(cellsNumber, existCells.length);
         for (let index = 0; index < totalCount; index++) {
@@ -90,7 +90,7 @@ export default class TableColumnTool {
 
     addColCellHolderHandler(cell) {
         const tableContainer = Quill.find(this.table);
-        const $holder = cell.querySelector('.qlbt-col-tool-cell-holder');
+        const $holder = cell.querySelector('.quill-table-col-tool__cell-holder');
         let dragging = false;
         let x0 = 0;
         let x = 0;
@@ -121,7 +121,7 @@ export default class TableColumnTool {
 
         const handleMouseup = e => {
             e.preventDefault();
-            const existCells = Array.from(this.domNode.querySelectorAll('.qlbt-col-tool-cell'));
+            const existCells = Array.from(this.domNode.querySelectorAll('.quill-table-col-tool__cell'));
             const colIndex = existCells.indexOf(cell);
             const colBlot = tableContainer.colGroup().children.at(colIndex);
             const nextColBlot = colBlot.next;
@@ -184,7 +184,7 @@ export default class TableColumnTool {
     }
 
     colToolCells() {
-        return Array.from(this.domNode.querySelectorAll('.qlbt-col-tool-cell'));
+        return Array.from(this.domNode.querySelectorAll('.quill-table-col-tool__cell'));
     }
 }
 

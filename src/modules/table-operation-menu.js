@@ -239,7 +239,7 @@ export default class TableOperationMenu {
 
     menuInitial({left, top}) {
         this.domNode = document.createElement('div');
-        this.domNode.classList.add('qlbt-operation-menu');
+        this.domNode.classList.add('quill-table-operation-menu');
         css(this.domNode, {
             position: 'absolute',
             left: `${left}px`,
@@ -270,14 +270,14 @@ export default class TableOperationMenu {
         // create dividing line
         function dividingCreator() {
             const dividing = document.createElement('div');
-            dividing.classList.add('qlbt-operation-menu-dividing');
+            dividing.classList.add('quill-table-operation-menu__divider');
             return dividing;
         }
 
         // create subtitle for menu
         function subTitleCreator(title) {
             const subTitle = document.createElement('div');
-            subTitle.classList.add('qlbt-operation-menu-subtitle');
+            subTitle.classList.add('quill-table-operation-menu__subtitle');
             subTitle.innerText = title;
             return subTitle;
         }
@@ -286,7 +286,7 @@ export default class TableOperationMenu {
     colorsItemCreator(colors) {
         const self = this;
         const node = document.createElement('div');
-        node.classList.add('qlbt-operation-color-picker');
+        node.classList.add('quill-table-color-picker');
 
         colors.forEach(color => {
             let colorBox = colorBoxCreator(color);
@@ -295,7 +295,7 @@ export default class TableOperationMenu {
 
         function colorBoxCreator(color) {
             const box = document.createElement('div');
-            box.classList.add('qlbt-operation-color-picker-item');
+            box.classList.add('quill-table-color-picker__item');
             box.setAttribute('data-color', color);
             box.style.backgroundColor = color;
 
@@ -320,14 +320,14 @@ export default class TableOperationMenu {
 
     menuItemCreator({text, iconSrc, handler}) {
         const node = document.createElement('div');
-        node.classList.add('qlbt-operation-menu-item');
+        node.classList.add('quill-table-operation-menu__item');
 
         const iconSpan = document.createElement('span');
-        iconSpan.classList.add('qlbt-operation-menu-icon');
+        iconSpan.classList.add('quill-table-operation-menu__icon');
         iconSpan.innerHTML = iconSrc;
 
         const textSpan = document.createElement('span');
-        textSpan.classList.add('qlbt-operation-menu-text');
+        textSpan.classList.add('quill-table-operation-menu__text');
         textSpan.innerText = text;
 
         node.appendChild(iconSpan);

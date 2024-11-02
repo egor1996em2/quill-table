@@ -248,6 +248,7 @@ class TableCell extends Container {
 }
 
 TableCell.blotName = 'table';
+TableCell.className = 'quill-table__cell';
 TableCell.tagName = 'TD';
 
 class TableRow extends Container {
@@ -796,7 +797,7 @@ class TableContainer extends Container {
 }
 
 TableContainer.blotName = 'table-container';
-TableContainer.className = 'quill-better-table';
+TableContainer.className = 'quill-table__table';
 TableContainer.tagName = 'TABLE';
 
 class TableViewWrapper extends Container {
@@ -825,7 +826,7 @@ class TableViewWrapper extends Container {
 }
 
 TableViewWrapper.blotName = 'table-view';
-TableViewWrapper.className = 'quill-better-table-wrapper';
+TableViewWrapper.className = 'quill-table__wrapper';
 TableViewWrapper.tagName = 'DIV';
 
 TableViewWrapper.allowedChildren = [TableContainer];
