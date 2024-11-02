@@ -1,4 +1,4 @@
-import Quill from 'quill/core';
+import Quill from 'quill';
 import {css} from '../utils';
 import {CELL_MIN_WIDTH, COL_TOOL_CELL_HEIGHT, COL_TOOL_HEIGHT, PRIMARY_COLOR} from 'src/contants';
 

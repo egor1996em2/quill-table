@@ -1,4 +1,4 @@
-import Quill from 'quill/core';
+import Quill from 'quill';
 import {_omit, convertToHex} from './index';
 
 const Delta = Quill.import('delta');

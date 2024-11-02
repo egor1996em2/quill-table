@@ -1,4 +1,4 @@
-import Quill from 'quill/core';
+import Quill from 'quill';
 import {CELL_ATTRIBUTES, CELL_IDENTITY_KEYS, TableCell, TableCellLine} from './table';
 
 const Block = Quill.import('blots/block');
