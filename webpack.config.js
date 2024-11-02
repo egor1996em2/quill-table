@@ -121,7 +121,7 @@ module.exports = (env, argv) => {
 
         plugins: [
             new HtmlWebpackPlugin({
-                title: 'quill-better-table',
+                title: 'quill-table',
                 template: './demo/demo.html',
                 filename: 'demo/demo.html',
             }),
