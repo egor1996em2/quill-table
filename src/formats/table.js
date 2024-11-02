@@ -1,4 +1,4 @@
-import Quill from 'quill';
+import Quill from 'quill/core';
 import {getRelativeRect} from '../utils';
 import Header from './header';
 import {ERROR_LIMIT} from 'src/contants';
