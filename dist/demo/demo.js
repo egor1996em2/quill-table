@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "9c313ce7dc625e9d9060";
+/******/ 	var hotCurrentHash = "523c47a084fbbc5bfbaa";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -1062,7 +1062,7 @@ class table_column_tool_TableColumnTool {
     css(this.domNode, {
       width: `${tableViewRect.width}px`,
       height: `${COL_TOOL_HEIGHT}px`,
-      left: `${tableViewRect.left - containerRect.left + parent.scrollLeft}px`,
+      left: `${this.table.offsetLeft + parent.scrollLeft}px`,
       top: `${tableViewRect.top - containerRect.top + parent.scrollTop - COL_TOOL_HEIGHT - 5}px`
     });
   }
@@ -1405,7 +1405,7 @@ class TableCellLine extends table_Block {
   }
 }
 TableCellLine.blotName = 'table-cell-line';
-TableCellLine.className = 'qlbt-cell-line';
+TableCellLine.className = 'quill-table__cell-line';
 TableCellLine.tagName = 'P';
 class TableCell extends Container {
   checkMerge() {

@@ -74,6 +74,7 @@
 .quill-table-col-tool {
 	position: absolute;
     display: flex;
+	box-sizing: border-box;
     align-items: flex-end;
     overflow: hidden;
     z-index: 99;
