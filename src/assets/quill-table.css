@@ -12,6 +12,11 @@
 	padding: 2px 5px;
 }
 
+.quill-table__cell-line {
+	margin: 0;
+	padding: 0;
+}
+
 .quill-table-operation-menu {
 	background-color: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
