@@ -23,6 +23,18 @@
     font-size: 14px;
     z-index: 100;
     overflow: hidden;
+	border: 1px solid #ebebeb;
+	padding: 4px;
+    background-color: #fff;
+    border-radius: 3px;
+    box-shadow: 0 5px 20px -5px rgba(0, 14, 66, .2);
+    box-sizing: border-box;
+    font-family: 'tfutura', Arial, sans-serif;
+    pointer-events: all;
+    -webkit-font-smoothing: subpixel-antialiased;
+    color: #000;
+	transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+    transform-origin: top left;
 }
 
 .quill-table-operation-menu__divider {
@@ -39,16 +51,20 @@
 .quill-table-operation-menu__item {
 	display: flex;
     align-items: center;
-    padding: 10px 16px;
+    padding: 10px 6px;
+	font-size: 15px;
+    font-weight: 300;
+    line-height: 20px;
+    border-radius: 2px;
+    overflow: hidden;
     background-color: #fff;
     cursor: pointer;
-    color: #595959;
-    overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .quill-table-operation-menu__item:hover {
-	background-color: #efefef;
+	color: #fff;
+    background-color: #fa8669;
 }
 
 .quill-table-operation-menu__icon {
