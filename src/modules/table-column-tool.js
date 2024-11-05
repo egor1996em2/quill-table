@@ -24,7 +24,7 @@ export default class TableColumnTool {
             width: `${tableViewRect.width}px`,
             height: `${COL_TOOL_HEIGHT}px`,
             left: `${this.table.offsetLeft + parent.scrollLeft}px`,
-            top: `${this.table.offsetTop + parent.scrollTop - COL_TOOL_HEIGHT - 5}px`,
+            top: `${this.table.offsetTop + parent.scrollTop - COL_TOOL_HEIGHT - 8}px`,
         });
     }
 
@@ -63,19 +63,19 @@ export default class TableColumnTool {
                 this.domNode.appendChild(toolCell);
                 this.addColCellHolderHandler(toolCell);
                 // set tool cell min-width
-                const colWidthRate = ((colWidth / tableWidth) * 100).toFixed(2);
+                const colWidthRate = (colWidth / tableWidth) * 100;
                 css(toolCell, {
-                    'min-width': `${colWidthRate}%`,
+                    width: `${colWidthRate}%`,
                 });
             } else if (existCells[index] && index >= cellsNumber) {
                 existCells[index].remove();
             } else {
                 toolCell = existCells[index];
-                const colWidthRate = ((colWidth / tableWidth) * 100).toFixed(2);
+                const colWidthRate = (colWidth / tableWidth) * 100;
 
                 // set tool cell min-width
                 css(toolCell, {
-                    'min-width': `${colWidthRate}%`,
+                    width: `${colWidthRate}%`,
                 });
             }
         }

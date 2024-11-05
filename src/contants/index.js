@@ -1,5 +1,5 @@
 const ERROR_LIMIT = 5;
-const COL_TOOL_HEIGHT = 12;
+const COL_TOOL_HEIGHT = 16;
 const COL_TOOL_CELL_HEIGHT = 12;
 const ROW_TOOL_WIDTH = 12;
 const CELL_MIN_WIDTH = 50;
