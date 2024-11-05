@@ -82,7 +82,7 @@
 	box-sizing: border-box;
     align-items: flex-end;
     overflow: hidden;
-    z-index: 99;
+    z-index: 95;
     height: 16px;
 }
 
