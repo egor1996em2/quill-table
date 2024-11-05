@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "13af508c3da40815430c";
+/******/ 	var hotCurrentHash = "f519aaa49ba3c423cd50";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -1032,7 +1032,7 @@ function convertToHex(rgb) {
 }
 // CONCATENATED MODULE: ./src/contants/index.js
 const ERROR_LIMIT = 5;
-const COL_TOOL_HEIGHT = 12;
+const COL_TOOL_HEIGHT = 16;
 const COL_TOOL_CELL_HEIGHT = 12;
 const ROW_TOOL_WIDTH = 12;
 const CELL_MIN_WIDTH = 50;
@@ -1053,7 +1053,6 @@ class table_column_tool_TableColumnTool {
   }
   initColTool() {
     const parent = this.quill.root.parentNode;
-    const containerRect = parent.getBoundingClientRect();
     const tableViewRect = this.table.parentNode.getBoundingClientRect();
     this.domNode = document.createElement('div');
     this.domNode.classList.add('quill-table-col-tool');
@@ -1063,7 +1062,7 @@ class table_column_tool_TableColumnTool {
       width: `${tableViewRect.width}px`,
       height: `${COL_TOOL_HEIGHT}px`,
       left: `${this.table.offsetLeft + parent.scrollLeft}px`,
-      top: `${tableViewRect.top - containerRect.top + parent.scrollTop - COL_TOOL_HEIGHT - 5}px`
+      top: `${this.table.offsetTop + parent.scrollTop - COL_TOOL_HEIGHT - 8}px`
     });
   }
   createToolCell(isClassName = true) {
@@ -1097,19 +1096,19 @@ class table_column_tool_TableColumnTool {
         this.domNode.appendChild(toolCell);
         this.addColCellHolderHandler(toolCell);
         // set tool cell min-width
-        const colWidthRate = (colWidth / tableWidth * 100).toFixed(2);
+        const colWidthRate = colWidth / tableWidth * 100;
         css(toolCell, {
-          'min-width': `${colWidthRate}%`
+          width: `${colWidthRate}%`
         });
       } else if (existCells[index] && index >= cellsNumber) {
         existCells[index].remove();
       } else {
         toolCell = existCells[index];
-        const colWidthRate = (colWidth / tableWidth * 100).toFixed(2);
+        const colWidthRate = colWidth / tableWidth * 100;
 
         // set tool cell min-width
         css(toolCell, {
-          'min-width': `${colWidthRate}%`
+          width: `${colWidthRate}%`
         });
       }
     }
