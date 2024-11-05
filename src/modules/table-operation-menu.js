@@ -1,16 +1,6 @@
 import Quill from 'quill';
 import {css, getRelativeRect} from '../utils';
 
-// svg icons
-import operationIcon1 from '../assets/icons/icon_operation_1.svg';
-import operationIcon2 from '../assets/icons/icon_operation_2.svg';
-import operationIcon3 from '../assets/icons/icon_operation_3.svg';
-import operationIcon4 from '../assets/icons/icon_operation_4.svg';
-import operationIcon5 from '../assets/icons/icon_operation_5.svg';
-import operationIcon6 from '../assets/icons/icon_operation_6.svg';
-import operationIcon7 from '../assets/icons/icon_operation_7.svg';
-import operationIcon8 from '../assets/icons/icon_operation_8.svg';
-import operationIcon9 from '../assets/icons/icon_operation_9.svg';
 import {getColToolCellIndexByBoundary, getColToolCellIndexesByBoundary} from 'src/utils/table-util';
 import {ERROR_LIMIT} from 'src/contants';
 
@@ -22,7 +12,7 @@ const DEFAULT_COLOR_SUBTITLE = 'Background Colors';
 const MENU_ITEMS_DEFAULT = {
     insertColumnRight: {
         text: 'Insert column right',
-        iconSrc: operationIcon1,
+        iconClass: 'quill-table-operation-menu__icon-add-column-right',
         handler() {
             const tableContainer = Quill.find(this.table);
             let colIndex = getColToolCellIndexByBoundary(
@@ -48,7 +38,7 @@ const MENU_ITEMS_DEFAULT = {
 
     insertColumnLeft: {
         text: 'Insert column left',
-        iconSrc: operationIcon2,
+        iconClass: 'quill-table-operation-menu__icon-add-column-left',
         handler() {
             const tableContainer = Quill.find(this.table);
             let colIndex = getColToolCellIndexByBoundary(
@@ -74,7 +64,7 @@ const MENU_ITEMS_DEFAULT = {
 
     insertRowUp: {
         text: 'Insert row up',
-        iconSrc: operationIcon3,
+        iconClass: 'quill-table-operation-menu__icon-add-column-top',
         handler() {
             const tableContainer = Quill.find(this.table);
             const affectedCells = tableContainer.insertRow(this.boundary, false, this.quill.root.parentNode);
@@ -89,7 +79,7 @@ const MENU_ITEMS_DEFAULT = {
 
     insertRowDown: {
         text: 'Insert row down',
-        iconSrc: operationIcon4,
+        iconClass: 'quill-table-operation-menu__icon-add-column-bottom',
         handler() {
             const tableContainer = Quill.find(this.table);
             const affectedCells = tableContainer.insertRow(this.boundary, true, this.quill.root.parentNode);
@@ -104,7 +94,7 @@ const MENU_ITEMS_DEFAULT = {
 
     mergeCells: {
         text: 'Merge selected cells',
-        iconSrc: operationIcon5,
+        iconClass: 'quill-table-operation-menu__icon-merge-cells',
         handler() {
             const tableContainer = Quill.find(this.table);
             // compute merged Cell rowspan, equal to length of selected rows
@@ -148,7 +138,7 @@ const MENU_ITEMS_DEFAULT = {
 
     unmergeCells: {
         text: 'Unmerge cells',
-        iconSrc: operationIcon6,
+        iconClass: 'quill-table-operation-menu__icon-slpit-cells',
         handler() {
             const tableContainer = Quill.find(this.table);
             tableContainer.unmergeCells(this.selectedTds, this.quill.root.parentNode);
@@ -159,7 +149,7 @@ const MENU_ITEMS_DEFAULT = {
 
     deleteColumn: {
         text: 'Delete selected columns',
-        iconSrc: operationIcon7,
+        iconClass: 'quill-table-operation-menu__icon-remove-column',
         handler() {
             const tableContainer = Quill.find(this.table);
             let colIndexes = getColToolCellIndexesByBoundary(
@@ -184,7 +174,7 @@ const MENU_ITEMS_DEFAULT = {
 
     deleteRow: {
         text: 'Delete selected rows',
-        iconSrc: operationIcon8,
+        iconClass: 'quill-table-operation-menu__icon-remove-row',
         handler() {
             const tableContainer = Quill.find(this.table);
             tableContainer.deleteRow(this.boundary, this.quill.root.parentNode);
@@ -195,7 +185,7 @@ const MENU_ITEMS_DEFAULT = {
 
     deleteTable: {
         text: 'Delete table',
-        iconSrc: operationIcon9,
+        iconClass: 'quill-table-operation-menu__icon-delete-table',
         handler() {
             const betterTableModule = this.quill.getModule('quill-table');
             const tableContainer = Quill.find(this.table);
@@ -318,13 +308,13 @@ export default class TableOperationMenu {
         return node;
     }
 
-    menuItemCreator({text, iconSrc, handler}) {
+    menuItemCreator({text, iconClass, handler}) {
         const node = document.createElement('div');
         node.classList.add('quill-table-operation-menu__item');
 
         const iconSpan = document.createElement('span');
         iconSpan.classList.add('quill-table-operation-menu__icon');
-        iconSpan.innerHTML = iconSrc;
+        iconSpan.classList.add(iconClass);
 
         const textSpan = document.createElement('span');
         textSpan.classList.add('quill-table-operation-menu__text');
