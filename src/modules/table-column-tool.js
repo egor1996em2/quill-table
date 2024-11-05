@@ -15,7 +15,6 @@ export default class TableColumnTool {
 
     initColTool() {
         const parent = this.quill.root.parentNode;
-        const containerRect = parent.getBoundingClientRect();
         const tableViewRect = this.table.parentNode.getBoundingClientRect();
         this.domNode = document.createElement('div');
         this.domNode.classList.add('quill-table-col-tool');
@@ -25,7 +24,7 @@ export default class TableColumnTool {
             width: `${tableViewRect.width}px`,
             height: `${COL_TOOL_HEIGHT}px`,
             left: `${this.table.offsetLeft + parent.scrollLeft}px`,
-            top: `${tableViewRect.top - containerRect.top + parent.scrollTop - COL_TOOL_HEIGHT - 5}px`,
+            top: `${this.table.offsetTop + parent.scrollTop - COL_TOOL_HEIGHT - 5}px`,
         });
     }
 
