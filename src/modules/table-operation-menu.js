@@ -1,17 +1,17 @@
 import Quill from 'quill';
 import {css, getRelativeRect} from '../utils';
+import {translate} from '../utils/translate';
 
 import {getColToolCellIndexByBoundary, getColToolCellIndexesByBoundary} from 'src/utils/table-util';
 import {ERROR_LIMIT} from 'src/contants';
 
 const MENU_MIN_HEIGHT = 150;
-const MENU_WIDTH = 200;
 const DEFAULT_CELL_COLORS = ['white', 'red', 'yellow', 'blue'];
 const DEFAULT_COLOR_SUBTITLE = 'Background Colors';
 
 const MENU_ITEMS_DEFAULT = {
     insertColumnRight: {
-        text: 'Insert column right',
+        text: translate('insert_column_right'),
         iconClass: 'quill-table-operation-menu__icon-add-column-right',
         handler() {
             const tableContainer = Quill.find(this.table);
@@ -37,7 +37,7 @@ const MENU_ITEMS_DEFAULT = {
     },
 
     insertColumnLeft: {
-        text: 'Insert column left',
+        text: translate('insert_column_left'),
         iconClass: 'quill-table-operation-menu__icon-add-column-left',
         handler() {
             const tableContainer = Quill.find(this.table);
@@ -63,7 +63,7 @@ const MENU_ITEMS_DEFAULT = {
     },
 
     insertRowUp: {
-        text: 'Insert row up',
+        text: translate('insert_row_up'),
         iconClass: 'quill-table-operation-menu__icon-add-column-top',
         handler() {
             const tableContainer = Quill.find(this.table);
@@ -78,7 +78,7 @@ const MENU_ITEMS_DEFAULT = {
     },
 
     insertRowDown: {
-        text: 'Insert row down',
+        text: translate('insert_row_bottom'),
         iconClass: 'quill-table-operation-menu__icon-add-column-bottom',
         handler() {
             const tableContainer = Quill.find(this.table);
@@ -93,7 +93,7 @@ const MENU_ITEMS_DEFAULT = {
     },
 
     mergeCells: {
-        text: 'Merge selected cells',
+        text: translate('merge_cells'),
         iconClass: 'quill-table-operation-menu__icon-merge-cells',
         handler() {
             const tableContainer = Quill.find(this.table);
@@ -137,7 +137,7 @@ const MENU_ITEMS_DEFAULT = {
     },
 
     unmergeCells: {
-        text: 'Unmerge cells',
+        text: translate('unmerge_cells'),
         iconClass: 'quill-table-operation-menu__icon-slpit-cells',
         handler() {
             const tableContainer = Quill.find(this.table);
@@ -148,7 +148,7 @@ const MENU_ITEMS_DEFAULT = {
     },
 
     deleteColumn: {
-        text: 'Delete selected columns',
+        text: translate('delete_columns'),
         iconClass: 'quill-table-operation-menu__icon-remove-column',
         handler() {
             const tableContainer = Quill.find(this.table);
@@ -173,7 +173,7 @@ const MENU_ITEMS_DEFAULT = {
     },
 
     deleteRow: {
-        text: 'Delete selected rows',
+        text: translate('delete_rows'),
         iconClass: 'quill-table-operation-menu__icon-remove-row',
         handler() {
             const tableContainer = Quill.find(this.table);
@@ -184,7 +184,7 @@ const MENU_ITEMS_DEFAULT = {
     },
 
     deleteTable: {
-        text: 'Delete table',
+        text: translate('delete_table'),
         iconClass: 'quill-table-operation-menu__icon-delete-table',
         handler() {
             const betterTableModule = this.quill.getModule('quill-table');
@@ -197,13 +197,13 @@ const MENU_ITEMS_DEFAULT = {
 };
 
 export default class TableOperationMenu {
-    constructor(params, quill, options) {
+    constructor(params, quill, options = {}) {
         const betterTableModule = quill.getModule('quill-table');
         this.tableSelection = betterTableModule.tableSelection;
         this.table = params.table;
         this.quill = quill;
         this.options = options;
-        this.menuItems = Object.assign({}, MENU_ITEMS_DEFAULT, options.items);
+        this.menuItems = Object.assign({}, MENU_ITEMS_DEFAULT, options.items || {});
         this.tableColumnTool = betterTableModule.columnTool;
         this.boundary = this.tableSelection.boundary;
         this.selectedTds = this.tableSelection.selectedTds;
@@ -235,7 +235,7 @@ export default class TableOperationMenu {
             left: `${left}px`,
             top: `${top}px`,
             'min-height': `${MENU_MIN_HEIGHT}px`,
-            width: `${MENU_WIDTH}px`,
+            'max-width': 'min(-10px + 100vw, 300px);',
         });
 
         for (let name in this.menuItems) {

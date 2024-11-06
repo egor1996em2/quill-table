@@ -14,19 +14,7 @@ window.onload = () => {
         theme: 'snow',
         modules: {
             table: false,
-            'quill-table': {
-                operationMenu: {
-                    items: {
-                        unmergeCells: {
-                            text: 'Another unmerge cells name',
-                        },
-                    },
-
-                    color: {
-                        colors: ['red', 'green', 'yellow', 'white', 'gold', 'cadetblue', 'darkseagreen', 'skyblue'],
-                    },
-                },
-            },
+            'quill-table': true,
             keyboard: {
                 bindings: QuillTable.keyboardBindings,
             },

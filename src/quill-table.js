@@ -111,7 +111,9 @@ class BetterTablePlus extends Module {
                     );
                 }
 
-                if (this.tableOperationMenu) this.tableOperationMenu = this.tableOperationMenu.destroy();
+                if (this.tableOperationMenu) {
+                    this.tableOperationMenu = this.tableOperationMenu.destroy();
+                }
 
                 if (tableNode) {
                     this.tableOperationMenu = new TableOperationMenu(
