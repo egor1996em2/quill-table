@@ -45,13 +45,8 @@ export default class TableSelection {
         this.quill.root.addEventListener('mouseup', mouseUpHandler, false);
 
         const self = this;
-        const startTd = e.target.closest('td[data-row]');
-        const startTdRect = getRelativeRect(startTd.getBoundingClientRect(), this.quill.root.parentNode);
         this.dragging = true;
-        this.boundary = computeBoundaryFromRects(startTdRect, startTdRect);
-        this.correctBoundary();
-        this.selectedTds = this.computeSelectedTds();
-        this.repositionHelpLines();
+        const {startTd, startTdRect} = this.highlitSelection(e.target);
 
         function mouseMoveHandler(e) {
             if (e.button !== 0 || !e.target.closest('.quill-table__table')) return;
@@ -73,6 +68,20 @@ export default class TableSelection {
             self.quill.root.removeEventListener('mouseup', mouseUpHandler, false);
             self.dragging = false;
         }
+    }
+
+    highlitSelection(target) {
+        const startTd = target.closest('td[data-row]');
+        const startTdRect = getRelativeRect(startTd.getBoundingClientRect(), this.quill.root.parentNode);
+        this.boundary = computeBoundaryFromRects(startTdRect, startTdRect);
+        this.correctBoundary();
+        this.selectedTds = this.computeSelectedTds();
+        this.repositionHelpLines();
+
+        return {
+            startTd,
+            startTdRect,
+        };
     }
 
     correctBoundary() {

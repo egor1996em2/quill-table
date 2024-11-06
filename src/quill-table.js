@@ -6,7 +6,7 @@ import TableOperationMenu from './modules/table-operation-menu';
 // import table node matchers
 import {matchTable, matchTableCell, matchTableHeader} from './utils/node-matchers';
 
-import {getEventComposedPath} from './utils/index';
+import {getEventComposedPath, css, getRelativeRect} from './utils/index';
 import {
     cellId,
     rowId,
@@ -48,18 +48,46 @@ class BetterTablePlus extends Module {
             evt => {
                 // bugfix: evt.path is undefined in Safari, FF, Micro Edge
                 const path = getEventComposedPath(evt);
-
                 if (!path || path.length <= 0) return;
 
-                const tableNode = path.filter(node => {
-                    return (
-                        node.tagName &&
-                        node.tagName.toUpperCase() === 'TABLE' &&
-                        node.classList.contains('quill-table__table')
-                    );
-                })[0];
+                const {tableNode, rowNode, cellNode} = path.reduce(
+                    (acc, node) => {
+                        if (!node.tagName) {
+                            return acc;
+                        }
+
+                        const tagName = node.tagName.toUpperCase();
+
+                        if (tagName === 'TABLE' && node.classList.contains('quill-table__table')) {
+                            acc.tableNode = node;
+                            return acc;
+                        }
+
+                        if (tagName === 'TR') {
+                            acc.rowNode = node;
+                        }
+
+                        // if multi columns selected
+                        if ((tagName === 'TBODY' || acc.rowNode) && !acc.cellNode) {
+                            const pointerElement = document.elementFromPoint(evt.x, evt.y);
+                            if (pointerElement) {
+                                acc.cellNode = pointerElement.closest('.quill-table__cell');
+                            }
+                        }
+
+                        if (node.classList.contains('quill-table__cell')) {
+                            acc.cellNode = node;
+                        }
+
+                        return acc;
+                    },
+                    {cellNode: null, rowNode: null, tableNode: null}
+                );
 
                 if (tableNode) {
+                    if (cellNode) {
+                        this.showContextMenuButton(tableNode, rowNode, cellNode);
+                    }
                     // current table clicked
                     if (this.table === tableNode) return;
                     // other table clicked
@@ -68,6 +96,7 @@ class BetterTablePlus extends Module {
                 } else if (this.table) {
                     // other clicked
                     this.hideTableTools();
+                    this.hideContextMenuButton();
                 }
             },
             false
@@ -111,23 +140,7 @@ class BetterTablePlus extends Module {
                     );
                 }
 
-                if (this.tableOperationMenu) {
-                    this.tableOperationMenu = this.tableOperationMenu.destroy();
-                }
-
-                if (tableNode) {
-                    this.tableOperationMenu = new TableOperationMenu(
-                        {
-                            table: tableNode,
-                            row: rowNode,
-                            cell: cellNode,
-                            left: evt.pageX,
-                            top: evt.pageY,
-                        },
-                        quill,
-                        options.operationMenu
-                    );
-                }
+                this.showTableOperationMenu(tableNode, rowNode, cellNode, evt);
             },
             false
         );
@@ -163,6 +176,10 @@ class BetterTablePlus extends Module {
         // remove matcher for tr tag
         quill.clipboard.matchers = quill.clipboard.matchers.filter(matcher => {
             return matcher[0] !== 'tr';
+        });
+
+        this.quill.on('editor-change', () => {
+            this.hideContextMenuButton();
         });
     }
 
@@ -327,6 +344,64 @@ class BetterTablePlus extends Module {
         this.tableSelection = null;
         this.tableOperationMenu = null;
         this.table = null;
+    }
+
+    showTableOperationMenu(tableNode, rowNode, cellNode, evt) {
+        if (this.tableOperationMenu) {
+            this.tableOperationMenu = this.tableOperationMenu.destroy();
+        }
+
+        if (tableNode) {
+            setTimeout(() => {
+                this.tableOperationMenu = new TableOperationMenu(
+                    {
+                        table: tableNode,
+                        row: rowNode,
+                        cell: cellNode,
+                        left: evt.pageX,
+                        top: evt.pageY,
+                    },
+                    this.quill,
+                    this.options.operationMenu
+                );
+            }, 0);
+        }
+    }
+
+    showContextMenuButton(tableNode, rowNode, cellNode) {
+        if (this.contextMenuButtonDomElement) {
+            this.hideContextMenuButton();
+        }
+
+        const parent = this.quill.root.parentNode;
+
+        const button = document.createElement('button');
+        button.classList.add('quill-table-operation-menu__context-btn');
+
+        const cellRect = getRelativeRect(cellNode.getBoundingClientRect(), parent);
+        css(button, {
+            top: `${cellRect.y + 2}px`,
+            left: `${cellRect.x1 + 2}px`,
+        });
+
+        button.addEventListener('click', evt => {
+            console.log(this.tableSelection);
+            if (this.tableSelection.selectedTds.length <= 1) {
+                this.tableSelection.highlitSelection(cellNode);
+            }
+            this.showTableOperationMenu(tableNode, rowNode, cellNode, evt);
+        });
+
+        this.contextMenuButtonDomElement = button;
+        parent.appendChild(button);
+    }
+
+    hideContextMenuButton() {
+        if (!this.contextMenuButtonDomElement) {
+            return;
+        }
+        this.contextMenuButtonDomElement.remove();
+        this.contextMenuButtonDomElement = null;
     }
 }
 
