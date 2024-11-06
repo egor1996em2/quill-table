@@ -2,7 +2,7 @@ import Quill from 'quill';
 import {css, getRelativeRect} from '../utils';
 import {translate} from '../utils/translate';
 
-import {getColToolCellIndexByBoundary, getColToolCellIndexesByBoundary} from 'src/utils/table-util';
+import {getColToolCellIndexesByBoundary} from 'src/utils/table-util';
 import {ERROR_LIMIT} from 'src/contants';
 
 const MENU_MIN_HEIGHT = 150;
@@ -15,14 +15,9 @@ const MENU_ITEMS_DEFAULT = {
         iconClass: 'quill-table-operation-menu__icon-add-column-right',
         handler() {
             const tableContainer = Quill.find(this.table);
-            let colIndex = getColToolCellIndexByBoundary(
-                this.columnToolCells,
-                this.boundary,
-                (cellRect, boundary) => {
-                    return Math.abs(cellRect.x + cellRect.width - boundary.x1) <= ERROR_LIMIT;
-                },
-                this.quill.root.parentNode
-            );
+            const rightCell = this.selectedTds[this.selectedTds.length - 1];
+            const cells = rightCell.domNode.parentNode.querySelectorAll('.quill-table__cell');
+            let colIndex = Array.from(cells).indexOf(rightCell.domNode);
 
             const newColumn = tableContainer.insertColumn(this.boundary, colIndex, true, this.quill.root.parentNode);
 
@@ -41,14 +36,9 @@ const MENU_ITEMS_DEFAULT = {
         iconClass: 'quill-table-operation-menu__icon-add-column-left',
         handler() {
             const tableContainer = Quill.find(this.table);
-            let colIndex = getColToolCellIndexByBoundary(
-                this.columnToolCells,
-                this.boundary,
-                (cellRect, boundary) => {
-                    return Math.abs(cellRect.x - boundary.x) <= ERROR_LIMIT;
-                },
-                this.quill.root.parentNode
-            );
+            const leftCell = this.selectedTds[0];
+            const cells = leftCell.domNode.parentNode.querySelectorAll('.quill-table__cell');
+            let colIndex = Array.from(cells).indexOf(leftCell.domNode);
 
             const newColumn = tableContainer.insertColumn(this.boundary, colIndex, false, this.quill.root.parentNode);
 
