@@ -169,7 +169,7 @@
     align-items: flex-end;
     overflow: hidden;
     z-index: 95;
-    height: 16px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, .1);
 }
 
 .quill-table-col-tool__cell {
@@ -178,6 +178,7 @@
     border-top: 1px solid #000;
     border-right: 1px solid #000;
     border-bottom: 1px solid #000;
+	background-color: #f5f5f5;
 }
 
 .quill-table-col-tool__cell:first-child {
