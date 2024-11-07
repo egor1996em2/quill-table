@@ -3,37 +3,42 @@ import {css, getRelativeRect} from '../utils/index';
 export default class TableContextMenuButton {
     constructor(quill, options) {
         this.quill = quill;
+        this.cellNode = options.cellNode;
 
         this.init(options);
     }
 
-    init({tableNode, rowNode, cellNode}) {
+    init({tableNode, rowNode}) {
         if (this.domNode) {
             this.hideContextMenuButton();
         }
 
         const parent = this.quill.root.parentNode;
 
-        const button = document.createElement('button');
-        button.classList.add('quill-table-operation-menu__context-btn');
+        this.domNode = document.createElement('button');
+        this.domNode.classList.add('quill-table-operation-menu__context-btn');
 
-        const cellRect = getRelativeRect(cellNode.getBoundingClientRect(), parent);
-        css(button, {
-            top: `${cellRect.y + 2}px`,
-            left: `${cellRect.x1 + 2}px`,
-        });
-
-        button.addEventListener('click', evt => {
+        this.domNode.addEventListener('click', evt => {
             const quillTable = this.quill.getModule('quill-table');
             const tableSelection = quillTable.tableSelection;
             if (tableSelection && tableSelection.selectedTds.length <= 1) {
-                tableSelection.highlitSelection(cellNode);
+                tableSelection.highlitSelection(this.cellNode);
             }
-            quillTable.showTableOperationMenu(tableNode, rowNode, cellNode, evt);
+            quillTable.showTableOperationMenu(tableNode, rowNode, this.cellNode, evt);
         });
 
-        this.domNode = button;
-        parent.appendChild(button);
+        this.calculateButtonPosition();
+
+        parent.appendChild(this.domNode);
+    }
+
+    calculateButtonPosition() {
+        const parent = this.quill.root.parentNode;
+        const cellRect = getRelativeRect(this.cellNode.getBoundingClientRect(), parent);
+        css(this.domNode, {
+            top: `${cellRect.y + 2}px`,
+            left: `${cellRect.x1 + 2}px`,
+        });
     }
 
     destroy() {

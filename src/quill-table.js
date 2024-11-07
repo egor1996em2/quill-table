@@ -190,6 +190,10 @@ class BetterTablePlus extends Module {
                     this.columnTool.updateToolCells();
                     this.columnTool.updateToolWidth();
                 }
+
+                if (this.contextMenuButton) {
+                    this.contextMenuButton.calculateButtonPosition();
+                }
             },
             false
         );
