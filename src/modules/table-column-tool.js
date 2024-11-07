@@ -33,13 +33,17 @@ export default class TableColumnTool {
         toolCell.classList.add('quill-table-col-tool__cell');
         const resizeHolder = document.createElement('div');
         if (isClassName) {
-            resizeHolder.classList.add('quill-table-col-tool__cell-holder');
+            this.setCellResizeHolderClass(resizeHolder);
         }
         css(toolCell, {
             height: `${COL_TOOL_CELL_HEIGHT}px`,
         });
         toolCell.appendChild(resizeHolder);
         return toolCell;
+    }
+
+    setCellResizeHolderClass(holder) {
+        holder.classList.add('quill-table-col-tool__cell-holder');
     }
 
     updateToolCells() {
@@ -53,7 +57,6 @@ export default class TableColumnTool {
 
                 const cellsNumber = computeCellsNumber(CellsInFirstRow);
                 let existCells = Array.from(this.domNode.querySelectorAll('.quill-table-col-tool__cell'));
-
                 const totalCount = Math.max(cellsNumber, existCells.length);
                 for (let index = 0; index < totalCount; index++) {
                     let col = tableCols.at(index);
@@ -79,6 +82,20 @@ export default class TableColumnTool {
                         css(toolCell, {
                             width: `${colWidthRate}%`,
                         });
+
+                        // if cell was last cell
+                        // add them resize holder
+                        const orderByIndex = index + 1;
+                        if (orderByIndex === existCells.length && orderByIndex < totalCount) {
+                            const holderElement = toolCell.querySelector('div');
+
+                            if (!holderElement) {
+                                continue;
+                            }
+
+                            this.setCellResizeHolderClass(holderElement);
+                            this.addColCellHolderHandler(toolCell);
+                        }
                     }
                 }
                 resolve();
