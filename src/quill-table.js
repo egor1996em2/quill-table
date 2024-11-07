@@ -181,6 +181,17 @@ class BetterTablePlus extends Module {
         this.quill.on('editor-change', () => {
             this.hideContextMenuButton();
         });
+
+        window.addEventListener(
+            'resize',
+            () => {
+                if (this.columnTool) {
+                    this.columnTool.updateToolCells();
+                    this.columnTool.updateToolWidth();
+                }
+            },
+            false
+        );
     }
 
     getTable(range = this.quill.getSelection()) {

@@ -15,17 +15,11 @@ export default class TableColumnTool {
 
     initColTool() {
         const parent = this.quill.root.parentNode;
-        const tableViewRect = this.table.parentNode.getBoundingClientRect();
         this.domNode = document.createElement('div');
         this.domNode.classList.add('quill-table-col-tool');
         this.updateToolCells();
         parent.appendChild(this.domNode);
-        css(this.domNode, {
-            width: `${tableViewRect.width}px`,
-            height: `${COL_TOOL_HEIGHT}px`,
-            left: `${this.table.offsetLeft + parent.scrollLeft}px`,
-            top: `${this.table.offsetTop + parent.scrollTop - COL_TOOL_HEIGHT - 8}px`,
-        });
+        this.updateToolWidth();
     }
 
     createToolCell(isClassName = true) {
@@ -44,6 +38,17 @@ export default class TableColumnTool {
 
     setCellResizeHolderClass(holder) {
         holder.classList.add('quill-table-col-tool__cell-holder');
+    }
+
+    updateToolWidth() {
+        const tableViewRect = this.table.parentNode.getBoundingClientRect();
+        const parent = this.quill.root.parentNode;
+        css(this.domNode, {
+            width: `${tableViewRect.width}px`,
+            height: `${COL_TOOL_HEIGHT}px`,
+            left: `${this.table.offsetLeft + parent.scrollLeft}px`,
+            top: `${this.table.offsetTop + parent.scrollTop - COL_TOOL_HEIGHT - 8}px`,
+        });
     }
 
     updateToolCells() {
