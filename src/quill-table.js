@@ -6,7 +6,7 @@ import TableOperationMenu from './modules/table-operation-menu';
 // import table node matchers
 import {matchTable, matchTableCell, matchTableHeader} from './utils/node-matchers';
 
-import {getEventComposedPath, css, getRelativeRect} from './utils/index';
+import {getEventComposedPath} from './utils/index';
 import {
     cellId,
     rowId,
@@ -21,6 +21,7 @@ import {
 } from './formats/table';
 import {getColToolCellIndexByBoundary, getColToolCellIndexesByBoundary} from 'src/utils/table-util';
 import {ERROR_LIMIT} from 'src/contants';
+import TableContextMenuButton from './modules/table-context-menu-button';
 
 const Module = Quill.import('core/module');
 const Delta = Quill.import('delta');
@@ -380,38 +381,23 @@ class BetterTablePlus extends Module {
     }
 
     showContextMenuButton(tableNode, rowNode, cellNode) {
-        if (this.contextMenuButtonDomElement) {
+        if (this.contextMenuButton) {
             this.hideContextMenuButton();
         }
 
-        const parent = this.quill.root.parentNode;
-
-        const button = document.createElement('button');
-        button.classList.add('quill-table-operation-menu__context-btn');
-
-        const cellRect = getRelativeRect(cellNode.getBoundingClientRect(), parent);
-        css(button, {
-            top: `${cellRect.y + 2}px`,
-            left: `${cellRect.x1 + 2}px`,
+        this.contextMenuButton = new TableContextMenuButton(this.quill, {
+            tableNode,
+            rowNode,
+            cellNode,
         });
-
-        button.addEventListener('click', evt => {
-            if (this.tableSelection.selectedTds.length <= 1) {
-                this.tableSelection.highlitSelection(cellNode);
-            }
-            this.showTableOperationMenu(tableNode, rowNode, cellNode, evt);
-        });
-
-        this.contextMenuButtonDomElement = button;
-        parent.appendChild(button);
     }
 
     hideContextMenuButton() {
-        if (!this.contextMenuButtonDomElement) {
+        if (!this.contextMenuButton) {
             return;
         }
-        this.contextMenuButtonDomElement.remove();
-        this.contextMenuButtonDomElement = null;
+
+        this.contextMenuButton = this.contextMenuButton.destroy();
     }
 }
 
