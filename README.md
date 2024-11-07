@@ -13,15 +13,42 @@
 
 # Использование
 
-Добавить `Quill` и файлы стилей
+Для использования пакета устанавливаем его как зависимость из нашего registry
 
-```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/quill/2.0.2/quill.min.js" type="text/javascript"></script>
+```bash
+npm install @tilda/quill-table
 ```
 
-```html
-<link href="https://cdnjs.cloudflare.com/ajax/libs/quill/2.0.2/quill.snow.min.css" rel="stylesheet" />
-<link href="https://unpkg.com/quill-better-table-plus@0.1.3/dist/quill-better-table-plus.css" rel="stylesheet" />
+Подключаем файл стилей в месте использования
+
+```javascript
+import '@tilda/quill-table/style.css';
+```
+Подключаем модуль к инстансу `Quill` и включаем табличные форматы
+
+```javascript
+import QuillTable from '@tilda/quill-table';
+
+Quill.register({
+	'modules/quill-table': QuillTable,
+});
+
+const quill = new Quill('#editor-wrapper', {
+    modules: {
+		// отключаем базовый модуль таблиц
+        table: false,
+		// подключаем quill-table
+        'quill-table': true,
+		// добавляем поддержку клавиатуры для работы  стаблицами
+        keyboard: {
+            bindings: QuillTable.keyboardBindings,
+        },
+    },
+	formats: [
+		// подключаем табличные форматы
+		...QuillTable.requiredTableFormats,
+	],
+});
 ```
 
 ## ES6

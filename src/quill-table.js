@@ -498,6 +498,17 @@ QuillTable.keyboardBindings = {
     },
 };
 
+QuillTable.requiredTableFormats = [
+    'table',
+    'table-cell-line',
+    'table-row',
+    'table-body',
+    'table-col',
+    'table-col-group',
+    'table-container',
+    'table-view',
+];
+
 function makeTableArrowHandler(up) {
     return {
         key: up ? 'ArrowUp' : 'ArrowDown',
