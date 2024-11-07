@@ -385,7 +385,6 @@ class BetterTablePlus extends Module {
         });
 
         button.addEventListener('click', evt => {
-            console.log(this.tableSelection);
             if (this.tableSelection.selectedTds.length <= 1) {
                 this.tableSelection.highlitSelection(cellNode);
             }

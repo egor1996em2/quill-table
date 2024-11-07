@@ -21,13 +21,13 @@ const MENU_ITEMS_DEFAULT = {
 
             const newColumn = tableContainer.insertColumn(this.boundary, colIndex, true, this.quill.root.parentNode);
 
-            this.tableColumnTool.updateToolCells();
             this.quill.update(Quill.sources.USER);
             this.quill.setSelection(this.quill.getIndex(newColumn[0]), 0, Quill.sources.SILENT);
             this.tableSelection.setSelection(
                 newColumn[0].domNode.getBoundingClientRect(),
                 newColumn[0].domNode.getBoundingClientRect()
             );
+            this.tableColumnTool.updateToolCells();
         },
     },
 
@@ -42,13 +42,13 @@ const MENU_ITEMS_DEFAULT = {
 
             const newColumn = tableContainer.insertColumn(this.boundary, colIndex, false, this.quill.root.parentNode);
 
-            this.tableColumnTool.updateToolCells();
             this.quill.update(Quill.sources.USER);
             this.quill.setSelection(this.quill.getIndex(newColumn[0]), 0, Quill.sources.SILENT);
             this.tableSelection.setSelection(
                 newColumn[0].domNode.getBoundingClientRect(),
                 newColumn[0].domNode.getBoundingClientRect()
             );
+            this.tableColumnTool.updateToolCells();
         },
     },
 
@@ -155,9 +155,9 @@ const MENU_ITEMS_DEFAULT = {
 
             let isDeleteTable = tableContainer.deleteColumns(this.boundary, colIndexes, this.quill.root.parentNode);
             if (!isDeleteTable) {
-                this.tableColumnTool.updateToolCells();
                 this.quill.update(Quill.sources.USER);
                 this.tableSelection.clearSelection();
+                this.tableColumnTool.updateToolCells();
             }
         },
     },

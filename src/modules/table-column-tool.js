@@ -43,42 +43,47 @@ export default class TableColumnTool {
     }
 
     updateToolCells() {
-        const tableContainer = Quill.find(this.table);
-        const CellsInFirstRow = tableContainer.children.tail.children.head.children;
-        const tableCols = tableContainer.colGroup().children;
+        return new Promise(resolve => {
+            setTimeout(() => {
+                const tableContainer = Quill.find(this.table);
+                const CellsInFirstRow = tableContainer.children.tail.children.head.children;
+                const tableCols = tableContainer.colGroup().children;
 
-        const tableWidth = tableContainer.children.tail.domNode.clientWidth;
+                const tableWidth = tableContainer.children.tail.domNode.clientWidth;
 
-        const cellsNumber = computeCellsNumber(CellsInFirstRow);
-        let existCells = Array.from(this.domNode.querySelectorAll('.quill-table-col-tool__cell'));
+                const cellsNumber = computeCellsNumber(CellsInFirstRow);
+                let existCells = Array.from(this.domNode.querySelectorAll('.quill-table-col-tool__cell'));
 
-        const totalCount = Math.max(cellsNumber, existCells.length);
-        for (let index = 0; index < totalCount; index++) {
-            let col = tableCols.at(index);
-            let colWidth = col && col.attributes.domNode.clientWidth;
-            // if cell already exist
-            let toolCell = null;
-            if (!existCells[index]) {
-                toolCell = this.createToolCell(index + 1 !== totalCount);
-                this.domNode.appendChild(toolCell);
-                this.addColCellHolderHandler(toolCell);
-                // set tool cell min-width
-                const colWidthRate = (colWidth / tableWidth) * 100;
-                css(toolCell, {
-                    width: `${colWidthRate}%`,
-                });
-            } else if (existCells[index] && index >= cellsNumber) {
-                existCells[index].remove();
-            } else {
-                toolCell = existCells[index];
-                const colWidthRate = (colWidth / tableWidth) * 100;
+                const totalCount = Math.max(cellsNumber, existCells.length);
+                for (let index = 0; index < totalCount; index++) {
+                    let col = tableCols.at(index);
+                    let colWidth = col && col.attributes.domNode.clientWidth;
+                    // if cell already exist
+                    let toolCell = null;
+                    if (!existCells[index]) {
+                        toolCell = this.createToolCell(index + 1 !== totalCount);
+                        this.domNode.appendChild(toolCell);
+                        this.addColCellHolderHandler(toolCell);
+                        // set tool cell width
+                        const colWidthRate = (colWidth / tableWidth) * 100;
+                        css(toolCell, {
+                            width: `${colWidthRate}%`,
+                        });
+                    } else if (existCells[index] && index >= cellsNumber) {
+                        existCells[index].remove();
+                    } else {
+                        toolCell = existCells[index];
+                        const colWidthRate = (colWidth / tableWidth) * 100;
 
-                // set tool cell min-width
-                css(toolCell, {
-                    width: `${colWidthRate}%`,
-                });
-            }
-        }
+                        // set tool cell width
+                        css(toolCell, {
+                            width: `${colWidthRate}%`,
+                        });
+                    }
+                }
+                resolve();
+            }, 0);
+        });
     }
 
     destroy() {
@@ -129,8 +134,6 @@ export default class TableColumnTool {
             if (dragging) {
                 colBlot.format('width', width0 + delta);
                 nextColBlot.format('width', nextCellWidth - delta);
-                css(cell, {'min-width': `${width0 + delta}px`});
-                css(nextCell, {'min-width': `${nextCellWidth - delta}px`});
 
                 x0 = 0;
                 x = 0;
