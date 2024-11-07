@@ -194,6 +194,10 @@ class BetterTablePlus extends Module {
                 if (this.contextMenuButton) {
                     this.contextMenuButton.calculateButtonPosition();
                 }
+
+                if (this.tableSelection) {
+                    this.tableSelection.refreshHelpLinesPosition();
+                }
             },
             false
         );
