@@ -201,6 +201,8 @@ export default class TableOperationMenu {
         this.columnToolCells = this.tableColumnTool.colToolCells();
         this.colorSubTitle = options.color && options.color.text ? options.color.text : DEFAULT_COLOR_SUBTITLE;
         this.cellColors = options.color && options.color.colors ? options.color.colors : DEFAULT_CELL_COLORS;
+        this.top = params.top;
+        this.left = params.left;
 
         this.menuInitial(params);
         this.mount();
@@ -209,6 +211,11 @@ export default class TableOperationMenu {
 
     mount() {
         document.body.appendChild(this.domNode);
+        const {left, top} = this.calculatePosition();
+        css(this.domNode, {
+            left: `${left}px`,
+            top: `${top}px`,
+        });
     }
 
     destroy() {
@@ -217,13 +224,11 @@ export default class TableOperationMenu {
         return null;
     }
 
-    menuInitial({left, top}) {
+    menuInitial() {
         this.domNode = document.createElement('div');
         this.domNode.classList.add('quill-table-operation-menu');
         css(this.domNode, {
             position: 'absolute',
-            left: `${left}px`,
-            top: `${top}px`,
             'min-height': `${MENU_MIN_HEIGHT}px`,
             'max-width': 'min(-10px + 100vw, 300px);',
         });
@@ -314,5 +319,33 @@ export default class TableOperationMenu {
         node.appendChild(textSpan);
         node.addEventListener('click', handler.bind(this), false);
         return node;
+    }
+
+    calculatePosition() {
+        const GAP_X = 3;
+
+        const clickX = parseInt(this.left, 10) || 0;
+        const clickY = parseInt(this.top, 10) || 0;
+        const {clientWidth, clientHeight} = document.documentElement;
+        const {offsetWidth, offsetHeight} = this.domNode;
+
+        let posX = clickX + GAP_X;
+        if (clickX + offsetWidth > clientWidth - GAP_X) {
+            posX = clickX - offsetWidth - GAP_X;
+            if (posX < GAP_X) posX = GAP_X;
+        }
+
+        let posY = clickY;
+        if (clickY + offsetHeight > clientHeight) {
+            posY = clickY - offsetHeight;
+            if (posY < MENU_MIN_HEIGHT) {
+                posY = MENU_MIN_HEIGHT;
+            }
+        }
+
+        return {
+            top: posY,
+            left: posX,
+        };
     }
 }
