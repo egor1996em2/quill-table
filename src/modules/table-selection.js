@@ -165,6 +165,10 @@ export default class TableSelection {
     // based on selectedTds compute positions of help lines
     // It is useful when selectedTds are not changed
     refreshHelpLinesPosition() {
+        if (this.selectedTds.length === 0) {
+            return;
+        }
+
         const startRect = getRelativeRect(
             this.selectedTds[0].domNode.getBoundingClientRect(),
             this.quill.root.parentNode
