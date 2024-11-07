@@ -26,7 +26,7 @@ import TableContextMenuButton from './modules/table-context-menu-button';
 const Module = Quill.import('core/module');
 const Delta = Quill.import('delta');
 
-class BetterTablePlus extends Module {
+class QuillTable extends Module {
     static register() {
         Quill.register(TableCol, true);
         Quill.register(TableColGroup, true);
@@ -409,7 +409,7 @@ class BetterTablePlus extends Module {
     }
 }
 
-BetterTablePlus.keyboardBindings = {
+QuillTable.keyboardBindings = {
     'table-cell-line backspace': {
         key: 'Backspace',
         format: ['table-cell-line'],
@@ -558,4 +558,4 @@ function isInTableCell(current) {
     return current && current.parent ? (isTableCell(current.parent) ? true : isInTableCell(current.parent)) : false;
 }
 
-export default BetterTablePlus;
+export default QuillTable;
