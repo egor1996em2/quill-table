@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "43d3424e75170d5c4da8";
+/******/ 	var hotCurrentHash = "cb7d0d7da296ffb01ee7";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -2024,7 +2024,7 @@ const table_selection_PRIMARY_COLOR = '#0589f3';
 const LINE_POSITIONS = ['left', 'right', 'top', 'bottom'];
 const table_selection_ERROR_LIMIT = 2;
 class table_selection_TableSelection {
-  constructor(table, quill, options) {
+  constructor(table, cell, quill, options) {
     if (!table) return null;
     this.table = table;
     this.quill = quill;
@@ -2045,6 +2045,9 @@ class table_selection_TableSelection {
       this.clearSelectionHandler();
       this.applyChangesForSelection(selectedIds, delta);
     });
+    if (cell) {
+      this.highlitSelection(cell);
+    }
   }
   helpLinesInitial() {
     let parent = this.quill.root.parentNode;
@@ -2929,7 +2932,7 @@ class quill_table_QuillTable extends Module {
         if (this.table === tableNode) return;
         // other table clicked
         if (this.table) this.hideTableTools();
-        this.showTableTools(tableNode, quill, options);
+        this.showTableTools(tableNode, cellNode, quill, options);
       } else if (this.table) {
         // other clicked
         this.hideTableTools();
@@ -3109,10 +3112,10 @@ class quill_table_QuillTable extends Module {
     const tableContainer = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(this.table);
     tableContainer.tableDestroy();
   }
-  showTableTools(table, quill, options) {
+  showTableTools(table, cellNode, quill, options) {
     this.table = table;
     this.columnTool = new table_column_tool_TableColumnTool(table, quill, options);
-    this.tableSelection = new table_selection_TableSelection(table, quill, options);
+    this.tableSelection = new table_selection_TableSelection(table, cellNode, quill, options);
   }
   hideTableTools() {
     this.columnTool && this.columnTool.destroy();
@@ -3298,7 +3301,7 @@ function makeTableArrowHandler(up) {
   };
 }
 function isInTableCell(current) {
-  return current.domNode.closest('table');
+  return current.domNode.closest && current.domNode.closest('table');
 }
 /* harmony default export */ var quill_table = __webpack_exports__["default"] = (quill_table_QuillTable);
 
