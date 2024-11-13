@@ -581,7 +581,7 @@ function makeTableArrowHandler(up) {
 }
 
 function isInTableCell(current) {
-    return current.domNode.closest('table');
+    return current.domNode.closest && current.domNode.closest('table');
 }
 
 export default QuillTable;
