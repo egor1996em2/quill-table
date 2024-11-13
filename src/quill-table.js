@@ -93,7 +93,7 @@ class QuillTable extends Module {
                     if (this.table === tableNode) return;
                     // other table clicked
                     if (this.table) this.hideTableTools();
-                    this.showTableTools(tableNode, quill, options);
+                    this.showTableTools(tableNode, cellNode, quill, options);
                 } else if (this.table) {
                     // other clicked
                     this.hideTableTools();
@@ -347,10 +347,10 @@ class QuillTable extends Module {
         tableContainer.tableDestroy();
     }
 
-    showTableTools(table, quill, options) {
+    showTableTools(table, cellNode, quill, options) {
         this.table = table;
         this.columnTool = new TableColumnTool(table, quill, options);
-        this.tableSelection = new TableSelection(table, quill, options);
+        this.tableSelection = new TableSelection(table, cellNode, quill, options);
     }
 
     hideTableTools() {

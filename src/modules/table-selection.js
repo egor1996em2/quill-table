@@ -7,7 +7,7 @@ const LINE_POSITIONS = ['left', 'right', 'top', 'bottom'];
 const ERROR_LIMIT = 2;
 
 export default class TableSelection {
-    constructor(table, quill, options) {
+    constructor(table, cell, quill, options) {
         if (!table) return null;
         this.table = table;
         this.quill = quill;
@@ -30,6 +30,10 @@ export default class TableSelection {
             this.clearSelectionHandler();
             this.applyChangesForSelection(selectedIds, delta);
         });
+
+        if (cell) {
+            this.highlitSelection(cell);
+        }
     }
 
     helpLinesInitial() {
