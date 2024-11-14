@@ -196,7 +196,7 @@ table .quill-table__cell {
     bottom: 0;
     z-index: 3;
     width: 1px;
-    background-color: transparent;
+    background-color: #808080;
     cursor: col-resize;
 	touch-action: none;
 }
