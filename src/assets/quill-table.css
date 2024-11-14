@@ -197,7 +197,7 @@ table .quill-table__cell {
     z-index: 3;
     width: 1px;
     background-color: transparent;
-    cursor: ew-resize;
+    cursor: col-resize;
 	touch-action: none;
 }
 

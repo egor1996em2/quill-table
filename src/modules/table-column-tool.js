@@ -48,7 +48,7 @@ export default class TableColumnTool {
             width: `${tableViewRect.width}px`,
             height: '12px',
             left: `${this.table.offsetLeft + parent.scrollLeft}px`,
-            top: `${this.table.offsetTop + parent.scrollTop - COL_TOOL_HEIGHT + 2}px`,
+            top: `${this.table.offsetTop + parent.scrollTop - COL_TOOL_HEIGHT}px`,
         });
     }
 
