@@ -67,7 +67,7 @@ table .quill-table__cell {
 .quill-table-operation-menu__item {
 	display: flex;
     align-items: center;
-    padding: 10px 6px;
+    padding: 6px 10px;
 	font-size: 15px;
     font-weight: 300;
     line-height: 20px;
