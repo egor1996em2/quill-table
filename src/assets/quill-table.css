@@ -225,6 +225,10 @@ table .quill-table__cell {
     height: 100%;
 }
 
+.quill-table__selection-line {
+    z-index: 9;
+}
+
 .quill-table__selection-line.quill-table__selection-line-left::before {
     position: absolute;
     left: -2px;

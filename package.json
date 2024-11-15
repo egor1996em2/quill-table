@@ -1,6 +1,6 @@
 {
     "name": "@tilda/quill-table",
-    "version": "1.3.9",
+    "version": "1.4.1",
     "description": "Модуль редактора Quill с поддержкой таблиц и функций их редактирования",
     "main": "dist/quill-table.js",
     "scripts": {

@@ -196,8 +196,8 @@ table .quill-table__cell {
     bottom: 0;
     z-index: 3;
     width: 1px;
-    background-color: transparent;
-    cursor: ew-resize;
+    background-color: #808080;
+    cursor: col-resize;
 	touch-action: none;
 }
 
@@ -223,6 +223,10 @@ table .quill-table__cell {
     display: block;
     width: 8px;
     height: 100%;
+}
+
+.quill-table__selection-line {
+    z-index: 9;
 }
 
 .quill-table__selection-line.quill-table__selection-line-left::before {
