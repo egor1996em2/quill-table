@@ -176,6 +176,8 @@ class QuillTable extends Module {
             return matcher[0] !== 'tr';
         });
 
+        this.quill.on('selection-change', range => this.correctSelection(range));
+
         this.quill.on('editor-change', () => {
             this.hideContextMenuButton();
         });
@@ -426,6 +428,19 @@ class QuillTable extends Module {
         }
         return true;
     }
+
+    correctSelection(range) {
+        if (!range) {
+            return;
+        }
+
+        const [newLine] = this.quill.getLine(range.index);
+        if (newLine.domNode.textContent.length >= range.length) {
+            return;
+        }
+
+        this.quill.setSelection(range.index, newLine.domNode.textContent.length);
+    }
 }
 
 QuillTable.keyboardBindings = {
@@ -482,6 +497,8 @@ QuillTable.keyboardBindings = {
 
     'table-cell-line up': makeTableArrowHandler(true),
     'table-cell-line down': makeTableArrowHandler(false),
+    'table-cell-line up shift': makeTableArrowHandler(true, true),
+    'table-cell-line down shift': makeTableArrowHandler(false, true),
     'down-to-table': {
         key: 'ArrowDown',
         collapsed: true,
@@ -528,10 +545,11 @@ QuillTable.requiredTableFormats = [
     'table-view',
 ];
 
-function makeTableArrowHandler(up) {
+function makeTableArrowHandler(up, useShift = false) {
     return {
         key: up ? 'ArrowUp' : 'ArrowDown',
         collapsed: true,
+        shiftKey: useShift,
         format: ['table-cell-line'],
         handler(range, context) {
             // TODO move to table module
@@ -581,7 +599,7 @@ function makeTableArrowHandler(up) {
 }
 
 function isInTableCell(current) {
-    return current.domNode.closest && current.domNode.closest('table');
+    return Boolean(current.domNode.closest && current.domNode.closest('table'));
 }
 
 export default QuillTable;
