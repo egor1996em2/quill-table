@@ -9,10 +9,6 @@ export default class TableContextMenuButton {
     }
 
     init({tableNode, rowNode}) {
-        if (this.domNode) {
-            this.hideContextMenuButton();
-        }
-
         const parent = this.quill.root.parentNode;
 
         this.domNode = document.createElement('button');

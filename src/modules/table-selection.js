@@ -1,15 +1,18 @@
 import Quill from 'quill';
 import {css, getRelativeRect} from '../utils';
 import {TableCell} from '../formats/table';
+import TableContextMenuButton from './table-context-menu-button';
 
 const PRIMARY_COLOR = '#0589f3';
 const LINE_POSITIONS = ['left', 'right', 'top', 'bottom'];
 const ERROR_LIMIT = 2;
 
 export default class TableSelection {
-    constructor(table, cell, quill, options) {
+    constructor({table, cell, row}, quill, options) {
         if (!table) return null;
         this.table = table;
+        this.rowNode = row;
+        this.cellNode = cell;
         this.quill = quill;
         this.options = options;
         this.boundary = {}; // params for selected square
@@ -53,9 +56,14 @@ export default class TableSelection {
 
     mouseDownHandler(e) {
         if (e.button !== 0 || !e.target.closest('.quill-table__table')) return;
+
+        let mouseLeaveTimeout = null;
+
         this.quill.root.addEventListener('mousemove', mouseMoveHandler, false);
         this.quill.root.addEventListener('mouseup', mouseUpHandler, false);
+        this.quill.root.addEventListener('mouseleave', mouseLeaveHandler, false);
         const selectedCells = this.table.querySelectorAll('.quill-table__cell-line--selected');
+        let endTd;
 
         selectedCells.forEach(cell => {
             cell.classList.remove('quill-table__cell-line--selected');
@@ -67,12 +75,19 @@ export default class TableSelection {
 
         function mouseMoveHandler(e) {
             if (e.button !== 0 || !e.target.closest('.quill-table__table')) return;
-            const endTd = e.target.closest('td[data-row]');
+
+            if (mouseLeaveTimeout) {
+                clearTimeout(mouseLeaveTimeout);
+            }
+
+            endTd = e.target.closest('td[data-row]');
             const endTdRect = getRelativeRect(endTd.getBoundingClientRect(), self.quill.root.parentNode);
+
             self.boundary = computeBoundaryFromRects(startTdRect, endTdRect);
             self.correctBoundary();
             self.selectedTds = self.computeSelectedTds();
             self.repositionHelpLines();
+            self.showContextMenuButton(endTd);
 
             // avoid select text in multiple table-cell
             if (startTd !== endTd) {
@@ -81,10 +96,33 @@ export default class TableSelection {
         }
 
         function mouseUpHandler() {
+            if (mouseLeaveTimeout) {
+                clearTimeout(mouseLeaveTimeout);
+            }
             self.quill.root.removeEventListener('mousemove', mouseMoveHandler, false);
             self.quill.root.removeEventListener('mouseup', mouseUpHandler, false);
+            self.quill.root.removeEventListener('mouseleave', mouseLeaveHandler, false);
             self.dragging = false;
             self.selectCell();
+            self.showContextMenuButton(endTd || startTd);
+        }
+
+        function mouseLeaveHandler(evt) {
+            if (!self.dragging) {
+                return;
+            }
+
+            if (isEventFromTableParts(evt)) {
+                return;
+            }
+
+            if (mouseLeaveTimeout) {
+                clearTimeout(mouseLeaveTimeout);
+            }
+
+            mouseLeaveTimeout = setTimeout(() => {
+                mouseUpHandler();
+            }, 1000);
         }
     }
 
@@ -95,6 +133,7 @@ export default class TableSelection {
         this.correctBoundary();
         this.selectedTds = this.computeSelectedTds();
         this.repositionHelpLines();
+        this.showContextMenuButton(startTd);
 
         return {
             startTd,
@@ -195,6 +234,11 @@ export default class TableSelection {
             this.selectedTds[this.selectedTds.length - 1].domNode.getBoundingClientRect(),
             this.quill.root.parentNode
         );
+
+        if (this.contextMenuButton) {
+            this.contextMenuButton.calculateButtonPosition();
+        }
+
         this.boundary = computeBoundaryFromRects(startRect, endRect);
         this.repositionHelpLines();
     }
@@ -209,6 +253,8 @@ export default class TableSelection {
 
         this.quill.off('text-change', this.clearSelectionHandler);
 
+        this.hideContextMenuButton();
+
         return null;
     }
 
@@ -220,6 +266,7 @@ export default class TableSelection {
         this.correctBoundary();
         this.selectedTds = this.computeSelectedTds();
         this.repositionHelpLines();
+        this.hideContextMenuButton();
     }
 
     clearSelection() {
@@ -284,6 +331,23 @@ export default class TableSelection {
 
         this.quill.setSelection(null);
     }
+
+    showContextMenuButton(cellNode) {
+        this.hideContextMenuButton();
+        this.contextMenuButton = new TableContextMenuButton(this.quill, {
+            tableNode: this.table,
+            rowNode: this.rowNode,
+            cellNode: cellNode,
+        });
+    }
+
+    hideContextMenuButton() {
+        if (!this.contextMenuButton) {
+            return;
+        }
+
+        this.contextMenuButton = this.contextMenuButton.destroy();
+    }
 }
 
 function computeBoundaryFromRects(startRect, endRect) {
@@ -299,4 +363,15 @@ function computeBoundaryFromRects(startRect, endRect) {
     let height = y1 - y;
 
     return {x, x1, y, y1, width, height};
+}
+
+function isEventFromTableParts(evt) {
+    const isOutFromInternalElement =
+        evt.relatedTarget && evt.relatedTarget.closest && evt.relatedTarget.closest('.quill-table__wrapper');
+    const isOutFromSelectionLine =
+        evt.relatedTarget && evt.relatedTarget.classList.contains('quill-table__selection-line');
+    const isOutFromContextButton =
+        evt.relatedTarget && evt.relatedTarget.classList.contains('quill-table-operation-menu__context-btn');
+
+    return isOutFromInternalElement || isOutFromSelectionLine || isOutFromContextButton;
 }

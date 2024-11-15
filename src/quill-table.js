@@ -21,7 +21,6 @@ import {
 } from './formats/table';
 import {getColToolCellIndexByBoundary, getColToolCellIndexesByBoundary} from 'src/utils/table-util';
 import {ERROR_LIMIT} from 'src/contants';
-import TableContextMenuButton from './modules/table-context-menu-button';
 
 const Module = Quill.import('core/module');
 const Delta = Quill.import('delta');
@@ -86,18 +85,14 @@ class QuillTable extends Module {
                 );
 
                 if (tableNode) {
-                    if (cellNode) {
-                        this.showContextMenuButton(tableNode, rowNode, cellNode);
-                    }
                     // current table clicked
                     if (this.table === tableNode) return;
                     // other table clicked
                     if (this.table) this.hideTableTools();
-                    this.showTableTools(tableNode, cellNode, quill, options);
+                    this.showTableTools(tableNode, rowNode, cellNode, quill, options);
                 } else if (this.table) {
                     // other clicked
                     this.hideTableTools();
-                    this.hideContextMenuButton();
                 }
             },
             false
@@ -176,10 +171,8 @@ class QuillTable extends Module {
             return matcher[0] !== 'tr';
         });
 
-        this.quill.on('selection-change', range => this.correctSelection(range));
-
-        this.quill.on('editor-change', () => {
-            this.hideContextMenuButton();
+        this.quill.on('selection-change', range => {
+            this.correctSelection(range);
         });
 
         window.addEventListener(
@@ -188,10 +181,6 @@ class QuillTable extends Module {
                 if (this.columnTool) {
                     this.columnTool.updateToolCells();
                     this.columnTool.updateToolWidth();
-                }
-
-                if (this.contextMenuButton) {
-                    this.contextMenuButton.calculateButtonPosition();
                 }
 
                 if (this.tableSelection) {
@@ -349,10 +338,18 @@ class QuillTable extends Module {
         tableContainer.tableDestroy();
     }
 
-    showTableTools(table, cellNode, quill, options) {
+    showTableTools(table, rowNode, cellNode, quill, options) {
         this.table = table;
         this.columnTool = new TableColumnTool(table, quill, options);
-        this.tableSelection = new TableSelection(table, cellNode, quill, options);
+        this.tableSelection = new TableSelection(
+            {
+                table,
+                row: rowNode,
+                cell: cellNode,
+            },
+            quill,
+            options
+        );
     }
 
     hideTableTools() {
@@ -384,26 +381,6 @@ class QuillTable extends Module {
                 );
             }, 0);
         }
-    }
-
-    showContextMenuButton(tableNode, rowNode, cellNode) {
-        if (this.contextMenuButton) {
-            this.hideContextMenuButton();
-        }
-
-        this.contextMenuButton = new TableContextMenuButton(this.quill, {
-            tableNode,
-            rowNode,
-            cellNode,
-        });
-    }
-
-    hideContextMenuButton() {
-        if (!this.contextMenuButton) {
-            return;
-        }
-
-        this.contextMenuButton = this.contextMenuButton.destroy();
     }
 
     tableDeletionProtection(range, context) {
