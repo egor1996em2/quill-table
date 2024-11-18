@@ -76,6 +76,11 @@ export default class TableSelection {
             cell.classList.remove('quill-table__cell-line--selected');
         });
 
+        const selectionLines = this.quill.root.parentNode.querySelectorAll('.quill-table__selection-line');
+        selectionLines.forEach(selectionLine => {
+            selectionLine.addEventListener('mouseup', mouseUpHandler, false);
+        });
+
         const self = this;
         this.dragging = true;
         const {startTd, startTdRect} = this.highlitSelection(e.target);
@@ -115,6 +120,9 @@ export default class TableSelection {
             self.quill.root.removeEventListener('mousemove', mouseMoveHandler, false);
             self.quill.root.removeEventListener('mouseup', mouseUpHandler, false);
             self.quill.root.removeEventListener('mouseleave', mouseLeaveHandler, false);
+            selectionLines.forEach(selectionLine => {
+                selectionLine.removeEventListener('mouseup', mouseUpHandler, false);
+            });
             self.dragging = false;
             self.selectCell();
             self.showContextMenuButton(endTd || startTd);
