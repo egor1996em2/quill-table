@@ -21,7 +21,7 @@ const MENU_ITEMS_DEFAULT = {
 
             const newColumn = tableContainer.insertColumn(this.boundary, colIndex, true, this.quill.root.parentNode);
 
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
             this.quill.setSelection(this.quill.getIndex(newColumn[0]), 0, Quill.sources.SILENT);
             this.tableSelection.setSelection(
                 newColumn[0].domNode.getBoundingClientRect(),
@@ -42,7 +42,7 @@ const MENU_ITEMS_DEFAULT = {
 
             const newColumn = tableContainer.insertColumn(this.boundary, colIndex, false, this.quill.root.parentNode);
 
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
             this.quill.setSelection(this.quill.getIndex(newColumn[0]), 0, Quill.sources.SILENT);
             this.tableSelection.setSelection(
                 newColumn[0].domNode.getBoundingClientRect(),
@@ -58,7 +58,7 @@ const MENU_ITEMS_DEFAULT = {
         handler() {
             const tableContainer = Quill.find(this.table);
             const affectedCells = tableContainer.insertRow(this.boundary, false, this.quill.root.parentNode);
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
             this.quill.setSelection(this.quill.getIndex(affectedCells[0]), 0, Quill.sources.SILENT);
             this.tableSelection.setSelection(
                 affectedCells[0].domNode.getBoundingClientRect(),
@@ -73,7 +73,7 @@ const MENU_ITEMS_DEFAULT = {
         handler() {
             const tableContainer = Quill.find(this.table);
             const affectedCells = tableContainer.insertRow(this.boundary, true, this.quill.root.parentNode);
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
             this.quill.setSelection(this.quill.getIndex(affectedCells[0]), 0, Quill.sources.SILENT);
             this.tableSelection.setSelection(
                 affectedCells[0].domNode.getBoundingClientRect(),
@@ -118,7 +118,7 @@ const MENU_ITEMS_DEFAULT = {
                 colspan,
                 this.quill.root.parentNode
             );
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
             this.tableSelection.setSelection(
                 mergedCell.domNode.getBoundingClientRect(),
                 mergedCell.domNode.getBoundingClientRect()
@@ -132,7 +132,7 @@ const MENU_ITEMS_DEFAULT = {
         handler() {
             const tableContainer = Quill.find(this.table);
             tableContainer.unmergeCells(this.selectedTds, this.quill.root.parentNode);
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
             this.tableSelection.clearSelection();
         },
     },
@@ -155,7 +155,7 @@ const MENU_ITEMS_DEFAULT = {
 
             let isDeleteTable = tableContainer.deleteColumns(this.boundary, colIndexes, this.quill.root.parentNode);
             if (!isDeleteTable) {
-                this.quill.update(Quill.sources.USER);
+                this.quill.update(Quill.sources.SILENT);
                 this.tableSelection.clearSelection();
                 this.tableColumnTool.updateToolCells();
             }
@@ -168,7 +168,7 @@ const MENU_ITEMS_DEFAULT = {
         handler() {
             const tableContainer = Quill.find(this.table);
             tableContainer.deleteRow(this.boundary, this.quill.root.parentNode);
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
             this.tableSelection.clearSelection();
         },
     },
@@ -181,7 +181,7 @@ const MENU_ITEMS_DEFAULT = {
             const tableContainer = Quill.find(this.table);
             betterTableModule.hideTableTools();
             tableContainer.remove();
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
         },
     },
 };
