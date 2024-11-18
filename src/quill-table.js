@@ -446,7 +446,7 @@ class QuillTable extends Module {
                     this.quill,
                     this.options
                 );
-            } else if (this.tableSelection.selectedTds.length === 1) {
+            } else if (this.tableSelection.selectedTds && this.tableSelection.selectedTds.length === 1) {
                 this.tableSelection.setSelection(line.parent.domNode, line.parent.domNode);
             }
             return;

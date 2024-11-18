@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "3e46343ac090dd70bbf1";
+/******/ 	var hotCurrentHash = "ba1edeaa40be1e44c735";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -3307,7 +3307,7 @@ class quill_table_QuillTable extends Module {
       }
       if (!this.tableSelection) {
         this.showTableTools(this.table, line.domNode.closest('tr'), line.parent.domNode, this.quill, this.options);
-      } else if (this.tableSelection.selectedTds.length === 1) {
+      } else if (this.tableSelection.selectedTds && this.tableSelection.selectedTds.length === 1) {
         this.tableSelection.setSelection(line.parent.domNode, line.parent.domNode);
       }
       return;
