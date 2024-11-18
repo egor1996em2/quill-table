@@ -2,6 +2,7 @@ import Quill from 'quill';
 import {css, getRelativeRect} from '../utils';
 import {TableCell} from '../formats/table';
 import TableContextMenuButton from './table-context-menu-button';
+import {getElementPositionInTable} from '../utils/table-util';
 
 const PRIMARY_COLOR = '#0589f3';
 const LINE_POSITIONS = ['left', 'right', 'top', 'bottom'];
@@ -93,12 +94,13 @@ export default class TableSelection {
             }
 
             const endTdRect = getRelativeRect(endTd.getBoundingClientRect(), self.quill.root.parentNode);
-
             self.boundary = computeBoundaryFromRects(startTdRect, endTdRect);
             self.correctBoundary();
-            self.selectedTds = self.computeSelectedTds();
-            self.repositionHelpLines();
-            self.showContextMenuButton(endTd);
+            self.selectedTds = self.computeSelectedTds(startTd, endTd);
+            setTimeout(() => {
+                self.refreshHelpLinesPosition();
+                self.showContextMenuButton(endTd);
+            }, 0);
 
             // avoid select text in multiple table-cell
             if (startTd !== endTd) {
@@ -142,7 +144,7 @@ export default class TableSelection {
         const startTdRect = getRelativeRect(startTd.getBoundingClientRect(), this.quill.root.parentNode);
         this.boundary = computeBoundaryFromRects(startTdRect, startTdRect);
         this.correctBoundary();
-        this.selectedTds = this.computeSelectedTds();
+        this.selectedTds = this.computeSelectedTds(target, target);
         this.repositionHelpLines();
         this.showContextMenuButton(startTd);
 
@@ -172,27 +174,38 @@ export default class TableSelection {
         });
     }
 
-    computeSelectedTds() {
-        const tableContainer = Quill.find(this.table);
-        const tableCells = tableContainer.descendants(TableCell);
+    computeSelectedTds(startTarget, endTarget) {
+        if (startTarget.tagName !== 'TD' || endTarget.tagName !== 'TD') {
+            return [];
+        }
 
-        return tableCells.reduce((selectedCells, tableCell) => {
-            let {x, y, width, height} = getRelativeRect(
-                tableCell.domNode.getBoundingClientRect(),
-                this.quill.root.parentNode
-            );
-            let isCellIncluded =
-                x + ERROR_LIMIT >= this.boundary.x &&
-                x - ERROR_LIMIT + width <= this.boundary.x1 &&
-                y + ERROR_LIMIT >= this.boundary.y &&
-                y - ERROR_LIMIT + height <= this.boundary.y1;
+        const rows = Array.from(this.table.querySelectorAll('tr'));
 
-            if (isCellIncluded) {
-                selectedCells.push(tableCell);
-            }
+        const startTargetPosition = getElementPositionInTable(startTarget, rows);
 
-            return selectedCells;
-        }, []);
+        if (startTargetPosition.row === null || startTargetPosition.col === null) {
+            return [];
+        }
+
+        const endTargetPosition = getElementPositionInTable(endTarget, rows);
+
+        if (!endTargetPosition.row === null || endTargetPosition.col === null) {
+            return [];
+        }
+
+        const selectedTds = [];
+
+        const {iterationStart, iterationEnd, beginSelectionIndex, endSelectionIndex} = getSelectionIterationParams(
+            startTargetPosition,
+            endTargetPosition
+        );
+
+        for (let i = iterationStart; i <= iterationEnd; i++) {
+            const tds = Array.from(rows[i].children).slice(beginSelectionIndex, endSelectionIndex + 1);
+            selectedTds.push(...tds.map(tdElement => Quill.find(tdElement)));
+        }
+
+        return selectedTds;
     }
 
     repositionHelpLines() {
@@ -273,13 +286,15 @@ export default class TableSelection {
         return null;
     }
 
-    setSelection(startRect, endRect) {
+    setSelection(startTd, endTd) {
+        const startRect = startTd.getBoundingClientRect();
+        const endRect = endTd.getBoundingClientRect();
         this.boundary = computeBoundaryFromRects(
             getRelativeRect(startRect, this.quill.root.parentNode),
             getRelativeRect(endRect, this.quill.root.parentNode)
         );
         this.correctBoundary();
-        this.selectedTds = this.computeSelectedTds();
+        this.selectedTds = this.computeSelectedTds(startTd, endTd);
         setTimeout(() => {
             this.refreshHelpLinesPosition();
             this.showContextMenuButton(this.selectedTds[this.selectedTds.length - 1].domNode);
@@ -392,4 +407,13 @@ function isEventFromTableParts(evt) {
         evt.relatedTarget && evt.relatedTarget.classList.contains('quill-table-operation-menu__context-btn');
 
     return isOutFromInternalElement || isOutFromSelectionLine || isOutFromContextButton;
+}
+
+function getSelectionIterationParams(startPosition, endPosition) {
+    return {
+        iterationStart: Math.min(startPosition.row, endPosition.row),
+        iterationEnd: Math.max(startPosition.row, endPosition.row),
+        beginSelectionIndex: Math.min(startPosition.col, endPosition.col),
+        endSelectionIndex: Math.max(startPosition.col, endPosition.col),
+    };
 }

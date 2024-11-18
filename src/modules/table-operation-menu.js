@@ -23,10 +23,7 @@ const MENU_ITEMS_DEFAULT = {
 
             this.quill.update(Quill.sources.SILENT);
             this.quill.setSelection(this.quill.getIndex(newColumn[0]), 0, Quill.sources.SILENT);
-            this.tableSelection.setSelection(
-                newColumn[0].domNode.getBoundingClientRect(),
-                newColumn[0].domNode.getBoundingClientRect()
-            );
+            this.tableSelection.setSelection(newColumn[0].domNode, newColumn[0].domNode);
             this.tableColumnTool.updateToolCells();
         },
     },
@@ -44,10 +41,7 @@ const MENU_ITEMS_DEFAULT = {
 
             this.quill.update(Quill.sources.SILENT);
             this.quill.setSelection(this.quill.getIndex(newColumn[0]), 0, Quill.sources.SILENT);
-            this.tableSelection.setSelection(
-                newColumn[0].domNode.getBoundingClientRect(),
-                newColumn[0].domNode.getBoundingClientRect()
-            );
+            this.tableSelection.setSelection(newColumn[0].domNode, newColumn[0].domNode);
             this.tableColumnTool.updateToolCells();
         },
     },
@@ -60,10 +54,7 @@ const MENU_ITEMS_DEFAULT = {
             const affectedCells = tableContainer.insertRow(this.boundary, false, this.quill.root.parentNode);
             this.quill.update(Quill.sources.SILENT);
             this.quill.setSelection(this.quill.getIndex(affectedCells[0]), 0, Quill.sources.SILENT);
-            this.tableSelection.setSelection(
-                affectedCells[0].domNode.getBoundingClientRect(),
-                affectedCells[0].domNode.getBoundingClientRect()
-            );
+            this.tableSelection.setSelection(affectedCells[0].domNode, affectedCells[0].domNode);
         },
     },
 
@@ -75,10 +66,7 @@ const MENU_ITEMS_DEFAULT = {
             const affectedCells = tableContainer.insertRow(this.boundary, true, this.quill.root.parentNode);
             this.quill.update(Quill.sources.SILENT);
             this.quill.setSelection(this.quill.getIndex(affectedCells[0]), 0, Quill.sources.SILENT);
-            this.tableSelection.setSelection(
-                affectedCells[0].domNode.getBoundingClientRect(),
-                affectedCells[0].domNode.getBoundingClientRect()
-            );
+            this.tableSelection.setSelection(affectedCells[0].domNode, affectedCells[0].domNode);
         },
     },
 
@@ -119,10 +107,7 @@ const MENU_ITEMS_DEFAULT = {
                 this.quill.root.parentNode
             );
             this.quill.update(Quill.sources.SILENT);
-            this.tableSelection.setSelection(
-                mergedCell.domNode.getBoundingClientRect(),
-                mergedCell.domNode.getBoundingClientRect()
-            );
+            this.tableSelection.setSelection(mergedCell.domNode, mergedCell.domNode);
         },
     },
 

@@ -24,7 +24,7 @@ window.onload = () => {
 
     let tableModule = quill.getModule('quill-table');
     document.body.querySelector('#insert-table').onclick = () => {
-        tableModule.insertTable(3, 3);
+        tableModule.insertTable(12, 8);
     };
 
     document.body.querySelector('#get-table').onclick = () => {

@@ -130,10 +130,7 @@ class QuillTable extends Module {
                     .includes(cellNode);
 
                 if (this.tableSelection.selectedTds.length <= 0 || !isTargetCellSelected) {
-                    this.tableSelection.setSelection(
-                        cellNode.getBoundingClientRect(),
-                        cellNode.getBoundingClientRect()
-                    );
+                    this.tableSelection.setSelection(cellNode, cellNode);
                 }
 
                 this.showTableOperationMenu(tableNode, rowNode, cellNode, evt);
@@ -285,8 +282,8 @@ class QuillTable extends Module {
         tableSelection.quill.update(Quill.sources.USER);
         tableSelection.quill.setSelection(tableSelection.quill.getIndex(newColumn[0]), 0, Quill.sources.SILENT);
         tableSelection.setSelection(
-            newColumn[0].domNode.getBoundingClientRect(),
-            newColumn[0].domNode.getBoundingClientRect()
+            newColumn[0].domNode,
+            newColumn[0].domNode
         );
     }
 
@@ -310,8 +307,8 @@ class QuillTable extends Module {
         tableSelection.quill.update(Quill.sources.USER);
         tableSelection.quill.setSelection(tableSelection.quill.getIndex(affectedCells[0]), 0, Quill.sources.SILENT);
         tableSelection.setSelection(
-            affectedCells[0].domNode.getBoundingClientRect(),
-            affectedCells[0].domNode.getBoundingClientRect()
+            affectedCells[0].domNode,
+            affectedCells[0].domNode
         );
     }
 
