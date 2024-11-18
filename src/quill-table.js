@@ -437,12 +437,34 @@ class QuillTable extends Module {
             return;
         }
 
-        const [newLine] = this.quill.getLine(range.index);
-        if (newLine.domNode.textContent.length >= range.length) {
+        const lines = this.quill.getLines(range);
+        const cellTextLines = lines.filter(line => line.statics.blotName === 'table-cell-line');
+        const cellTextLinesLength = cellTextLines.length;
+
+        if (cellTextLinesLength === 0) {
             return;
         }
 
-        this.quill.setSelection(range.index, newLine.domNode.textContent.length);
+        const firstCell = cellTextLines[0];
+        const firstLineIndex = this.quill.getIndex(firstCell);
+        const firstCellContentLength = firstCell.domNode.textContent.length;
+
+        if (lines.length === 1 && cellTextLinesLength === 1) {
+            // when try to select empty cell disable selection
+            if (firstCellContentLength === 0) {
+                this.quill.setSelection(firstLineIndex);
+                return;
+            }
+
+            if (!firstCell.parent.next && range.length >= firstCellContentLength) {
+                this.quill.setSelection(firstLineIndex, firstCellContentLength);
+            }
+            return;
+        }
+
+        const linesLength = lines.reduce((acc, line) => (acc += line.domNode.textContent.length), 0);
+
+        this.quill.setSelection(firstLineIndex, linesLength + cellTextLinesLength - 1);
     }
 }
 

@@ -87,6 +87,11 @@ export default class TableSelection {
             }
 
             endTd = e.target.closest('td[data-row]');
+
+            if (!endTd) {
+                return;
+            }
+
             const endTdRect = getRelativeRect(endTd.getBoundingClientRect(), self.quill.root.parentNode);
 
             self.boundary = computeBoundaryFromRects(startTdRect, endTdRect);
@@ -191,6 +196,10 @@ export default class TableSelection {
     }
 
     repositionHelpLines() {
+        if (!this.left || !this.right || !this.top || !this.bottom) {
+            return;
+        }
+
         const tableViewScrollLeft = this.table.parentNode.scrollLeft;
         css(this.left, {
             display: 'block',
