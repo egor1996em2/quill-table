@@ -265,8 +265,10 @@ export default class TableSelection {
         );
         this.correctBoundary();
         this.selectedTds = this.computeSelectedTds();
-        this.repositionHelpLines();
-        this.hideContextMenuButton();
+        setTimeout(() => {
+            this.refreshHelpLinesPosition();
+            this.showContextMenuButton(this.selectedTds[this.selectedTds.length - 1].domNode);
+        }, 0);
     }
 
     clearSelection() {
