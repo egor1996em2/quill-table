@@ -156,6 +156,8 @@ class QuillTable extends Module {
         );
         quill.keyboard.bindings.Backspace.splice(0, 2, ...thisBindings);
         quill.keyboard.bindings.Backspace.splice(quill.keyboard.bindings.Backspace.length - 2, 2);
+        const tableTabBinding = quill.keyboard.bindings.Tab[quill.keyboard.bindings.Tab.length - 1];
+        quill.keyboard.bindings.Tab.splice(0, 1, tableTabBinding);
         // add Matchers to match and render quill-better-table for initialization
         // or pasting
         quill.clipboard.addMatcher('td', matchTableCell);
@@ -567,6 +569,32 @@ QuillTable.keyboardBindings = {
                 return false;
             }
             return true;
+        },
+    },
+
+    'table-cell-line tab': {
+        key: 'Tab',
+        format: ['table-cell-line'],
+        handler(range, context) {
+            if (!isTableCellLine(context.line)) {
+                return true;
+            }
+
+            const tableCell = context.line.parent;
+
+            if (tableCell.next) {
+                const index = this.quill.getIndex(context.line.parent.next);
+                this.quill.setSelection(index, Quill.sources.USER);
+                return false;
+            }
+
+            if (tableCell.parent.next && tableCell.parent.next.children.length > 0) {
+                const index = this.quill.getIndex(tableCell.parent.next.children.head);
+                this.quill.setSelection(index, Quill.sources.USER);
+                return false;
+            }
+
+            return false;
         },
     },
 };
