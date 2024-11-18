@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "9471affa5725a3fcef34";
+/******/ 	var hotCurrentHash = "3e46343ac090dd70bbf1";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -2016,7 +2016,95 @@ function table_cellId() {
   return `cell-${id}`;
 }
 
+// CONCATENATED MODULE: ./src/modules/table-context-menu-button.js
+
+class table_context_menu_button_TableContextMenuButton {
+  constructor(quill, options) {
+    this.quill = quill;
+    this.cellNode = options.cellNode;
+    this.init(options);
+  }
+  init({
+    tableNode,
+    rowNode
+  }) {
+    const parent = this.quill.root.parentNode;
+    this.domNode = document.createElement('button');
+    this.domNode.classList.add('quill-table-operation-menu__context-btn');
+    this.domNode.type = 'button';
+    this.domNode.addEventListener('click', evt => {
+      const quillTable = this.quill.getModule('quill-table');
+      const tableSelection = quillTable.tableSelection;
+      if (tableSelection && tableSelection.selectedTds.length <= 1) {
+        tableSelection.highlitSelection(this.cellNode);
+      }
+      quillTable.showTableOperationMenu(tableNode, rowNode, this.cellNode, evt);
+    });
+    this.calculateButtonPosition();
+    parent.appendChild(this.domNode);
+  }
+  calculateButtonPosition() {
+    const parent = this.quill.root.parentNode;
+    const cellRect = getRelativeRect(this.cellNode.getBoundingClientRect(), parent);
+    css(this.domNode, {
+      top: `${cellRect.y}px`,
+      left: `${cellRect.x1}px`
+    });
+  }
+  destroy() {
+    if (this.domNode) {
+      this.domNode.remove();
+    }
+    return null;
+  }
+}
+// CONCATENATED MODULE: ./src/utils/table-util.js
+
+function getColToolCellIndexByBoundary(cells, boundary, conditionFn, container) {
+  return cells.reduce((findIndex, cell) => {
+    let cellRect = getRelativeRect(cell.getBoundingClientRect(), container);
+    if (conditionFn(cellRect, boundary)) {
+      findIndex = cells.indexOf(cell);
+    }
+    return findIndex;
+  }, false);
+}
+function getColToolCellIndexesByBoundary(cells, boundary, conditionFn, container) {
+  return cells.reduce((findIndexes, cell) => {
+    let cellRect = getRelativeRect(cell.getBoundingClientRect(), container);
+    if (conditionFn(cellRect, boundary)) {
+      findIndexes.push(cells.indexOf(cell));
+    }
+    return findIndexes;
+  }, []);
+}
+function getElementPositionInTable(td, rows) {
+  const position = {
+    row: null,
+    col: null
+  };
+  const row = td.closest && td.closest('tr');
+  const startColumnIndex = getColumnIndex(td);
+  if (startColumnIndex > -1) {
+    position.col = startColumnIndex;
+  }
+  const startRowIndex = rows.indexOf(row);
+  if (startRowIndex > -1) {
+    position.row = startRowIndex;
+  }
+  return position;
+}
+function getColumnIndex(target) {
+  const startRow = target.closest && target.closest('tr');
+  if (!startRow) {
+    return -1;
+  }
+  return Array.from(startRow.children).indexOf(target);
+}
+
 // CONCATENATED MODULE: ./src/modules/table-selection.js
+
+
 
 
 
@@ -2024,9 +2112,15 @@ const table_selection_PRIMARY_COLOR = '#0589f3';
 const LINE_POSITIONS = ['left', 'right', 'top', 'bottom'];
 const table_selection_ERROR_LIMIT = 2;
 class table_selection_TableSelection {
-  constructor(table, cell, quill, options) {
+  constructor({
+    table,
+    cell,
+    row
+  }, quill, options) {
     if (!table) return null;
     this.table = table;
+    this.rowNode = row;
+    this.cellNode = cell;
     this.quill = quill;
     this.options = options;
     this.boundary = {}; // params for selected square
@@ -2042,6 +2136,10 @@ class table_selection_TableSelection {
         return;
       }
       const selectedIds = this.selectedTds.slice(1);
+      if (this.selectedTds.length === 1) {
+        this.refreshHelpLinesPosition();
+        return;
+      }
       this.clearSelectionHandler();
       this.applyChangesForSelection(selectedIds, delta);
     });
@@ -2065,11 +2163,18 @@ class table_selection_TableSelection {
   }
   mouseDownHandler(e) {
     if (e.button !== 0 || !e.target.closest('.quill-table__table')) return;
+    let mouseLeaveTimeout = null;
     this.quill.root.addEventListener('mousemove', mouseMoveHandler, false);
     this.quill.root.addEventListener('mouseup', mouseUpHandler, false);
+    this.quill.root.addEventListener('mouseleave', mouseLeaveHandler, false);
     const selectedCells = this.table.querySelectorAll('.quill-table__cell-line--selected');
+    let endTd;
     selectedCells.forEach(cell => {
       cell.classList.remove('quill-table__cell-line--selected');
+    });
+    const selectionLines = this.quill.root.parentNode.querySelectorAll('.quill-table__selection-line');
+    selectionLines.forEach(selectionLine => {
+      selectionLine.addEventListener('mouseup', mouseUpHandler, false);
     });
     const self = this;
     this.dragging = true;
@@ -2079,12 +2184,21 @@ class table_selection_TableSelection {
     } = this.highlitSelection(e.target);
     function mouseMoveHandler(e) {
       if (e.button !== 0 || !e.target.closest('.quill-table__table')) return;
-      const endTd = e.target.closest('td[data-row]');
+      if (mouseLeaveTimeout) {
+        clearTimeout(mouseLeaveTimeout);
+      }
+      endTd = e.target.closest('td[data-row]');
+      if (!endTd) {
+        return;
+      }
       const endTdRect = getRelativeRect(endTd.getBoundingClientRect(), self.quill.root.parentNode);
       self.boundary = computeBoundaryFromRects(startTdRect, endTdRect);
       self.correctBoundary();
-      self.selectedTds = self.computeSelectedTds();
-      self.repositionHelpLines();
+      self.selectedTds = self.computeSelectedTds(startTd, endTd);
+      setTimeout(() => {
+        self.refreshHelpLinesPosition();
+        self.showContextMenuButton(endTd);
+      }, 0);
 
       // avoid select text in multiple table-cell
       if (startTd !== endTd) {
@@ -2092,10 +2206,32 @@ class table_selection_TableSelection {
       }
     }
     function mouseUpHandler() {
+      if (mouseLeaveTimeout) {
+        clearTimeout(mouseLeaveTimeout);
+      }
       self.quill.root.removeEventListener('mousemove', mouseMoveHandler, false);
       self.quill.root.removeEventListener('mouseup', mouseUpHandler, false);
+      self.quill.root.removeEventListener('mouseleave', mouseLeaveHandler, false);
+      selectionLines.forEach(selectionLine => {
+        selectionLine.removeEventListener('mouseup', mouseUpHandler, false);
+      });
       self.dragging = false;
       self.selectCell();
+      self.showContextMenuButton(endTd || startTd);
+    }
+    function mouseLeaveHandler(evt) {
+      if (!self.dragging) {
+        return;
+      }
+      if (isEventFromTableParts(evt)) {
+        return;
+      }
+      if (mouseLeaveTimeout) {
+        clearTimeout(mouseLeaveTimeout);
+      }
+      mouseLeaveTimeout = setTimeout(() => {
+        mouseUpHandler();
+      }, 1000);
     }
   }
   highlitSelection(target) {
@@ -2103,8 +2239,9 @@ class table_selection_TableSelection {
     const startTdRect = getRelativeRect(startTd.getBoundingClientRect(), this.quill.root.parentNode);
     this.boundary = computeBoundaryFromRects(startTdRect, startTdRect);
     this.correctBoundary();
-    this.selectedTds = this.computeSelectedTds();
+    this.selectedTds = this.computeSelectedTds(startTd, startTd);
     this.repositionHelpLines();
+    this.showContextMenuButton(startTd);
     return {
       startTd,
       startTdRect
@@ -2131,24 +2268,36 @@ class table_selection_TableSelection {
       }
     });
   }
-  computeSelectedTds() {
-    const tableContainer = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(this.table);
-    const tableCells = tableContainer.descendants(TableCell);
-    return tableCells.reduce((selectedCells, tableCell) => {
-      let {
-        x,
-        y,
-        width,
-        height
-      } = getRelativeRect(tableCell.domNode.getBoundingClientRect(), this.quill.root.parentNode);
-      let isCellIncluded = x + table_selection_ERROR_LIMIT >= this.boundary.x && x - table_selection_ERROR_LIMIT + width <= this.boundary.x1 && y + table_selection_ERROR_LIMIT >= this.boundary.y && y - table_selection_ERROR_LIMIT + height <= this.boundary.y1;
-      if (isCellIncluded) {
-        selectedCells.push(tableCell);
-      }
-      return selectedCells;
-    }, []);
+  computeSelectedTds(startTarget, endTarget) {
+    if (startTarget.tagName !== 'TD' || endTarget.tagName !== 'TD') {
+      return [];
+    }
+    const rows = Array.from(this.table.querySelectorAll('tr'));
+    const startTargetPosition = getElementPositionInTable(startTarget, rows);
+    if (startTargetPosition.row === null || startTargetPosition.col === null) {
+      return [];
+    }
+    const endTargetPosition = getElementPositionInTable(endTarget, rows);
+    if (!endTargetPosition.row === null || endTargetPosition.col === null) {
+      return [];
+    }
+    const selectedTds = [];
+    const {
+      iterationStart,
+      iterationEnd,
+      beginSelectionIndex,
+      endSelectionIndex
+    } = getSelectionIterationParams(startTargetPosition, endTargetPosition);
+    for (let i = iterationStart; i <= iterationEnd; i++) {
+      const tds = Array.from(rows[i].children).slice(beginSelectionIndex, endSelectionIndex + 1);
+      selectedTds.push(...tds.map(tdElement => external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(tdElement)));
+    }
+    return selectedTds;
   }
   repositionHelpLines() {
+    if (!this.left || !this.right || !this.top || !this.bottom) {
+      return;
+    }
     const tableViewScrollLeft = this.table.parentNode.scrollLeft;
     css(this.left, {
       display: 'block',
@@ -2188,6 +2337,9 @@ class table_selection_TableSelection {
     }
     const startRect = getRelativeRect(this.selectedTds[0].domNode.getBoundingClientRect(), this.quill.root.parentNode);
     const endRect = getRelativeRect(this.selectedTds[this.selectedTds.length - 1].domNode.getBoundingClientRect(), this.quill.root.parentNode);
+    if (this.contextMenuButton) {
+      this.contextMenuButton.calculateButtonPosition();
+    }
     this.boundary = computeBoundaryFromRects(startRect, endRect);
     this.repositionHelpLines();
   }
@@ -2198,13 +2350,19 @@ class table_selection_TableSelection {
     });
     this.quill.root.removeEventListener('mousedown', this.selectingHandler, false);
     this.quill.off('text-change', this.clearSelectionHandler);
+    this.hideContextMenuButton();
     return null;
   }
-  setSelection(startRect, endRect) {
+  setSelection(startTd, endTd) {
+    const startRect = startTd.getBoundingClientRect();
+    const endRect = endTd.getBoundingClientRect();
     this.boundary = computeBoundaryFromRects(getRelativeRect(startRect, this.quill.root.parentNode), getRelativeRect(endRect, this.quill.root.parentNode));
     this.correctBoundary();
-    this.selectedTds = this.computeSelectedTds();
-    this.repositionHelpLines();
+    this.selectedTds = this.computeSelectedTds(startTd, endTd);
+    setTimeout(() => {
+      this.refreshHelpLinesPosition();
+      this.showContextMenuButton(this.selectedTds[this.selectedTds.length - 1].domNode);
+    }, 0);
   }
   clearSelection() {
     if (this.selectedTds.length > 1) {
@@ -2217,6 +2375,7 @@ class table_selection_TableSelection {
         display: 'none'
       });
     });
+    this.hideContextMenuButton();
   }
   selectCell() {
     if (this.selectedTds.length <= 1) {
@@ -2253,6 +2412,20 @@ class table_selection_TableSelection {
     });
     this.quill.setSelection(null);
   }
+  showContextMenuButton(cellNode) {
+    this.hideContextMenuButton();
+    this.contextMenuButton = new table_context_menu_button_TableContextMenuButton(this.quill, {
+      tableNode: this.table,
+      rowNode: this.rowNode,
+      cellNode: cellNode
+    });
+  }
+  hideContextMenuButton() {
+    if (!this.contextMenuButton) {
+      return;
+    }
+    this.contextMenuButton = this.contextMenuButton.destroy();
+  }
 }
 function computeBoundaryFromRects(startRect, endRect) {
   let x = Math.min(startRect.x, endRect.x, startRect.x + startRect.width - 1, endRect.x + endRect.width - 1);
@@ -2268,6 +2441,20 @@ function computeBoundaryFromRects(startRect, endRect) {
     y1,
     width,
     height
+  };
+}
+function isEventFromTableParts(evt) {
+  const isOutFromInternalElement = evt.relatedTarget && evt.relatedTarget.closest && evt.relatedTarget.closest('.quill-table__wrapper');
+  const isOutFromSelectionLine = evt.relatedTarget && evt.relatedTarget.classList.contains('quill-table__selection-line');
+  const isOutFromContextButton = evt.relatedTarget && evt.relatedTarget.classList.contains('quill-table-operation-menu__context-btn');
+  return isOutFromInternalElement || isOutFromSelectionLine || isOutFromContextButton;
+}
+function getSelectionIterationParams(startPosition, endPosition) {
+  return {
+    iterationStart: Math.min(startPosition.row, endPosition.row),
+    iterationEnd: Math.max(startPosition.row, endPosition.row),
+    beginSelectionIndex: Math.min(startPosition.col, endPosition.col),
+    endSelectionIndex: Math.max(startPosition.col, endPosition.col)
   };
 }
 // CONCATENATED MODULE: ./src/assets/dict.js
@@ -2304,27 +2491,6 @@ function translate(key, forceLang) {
   const langDict = dict[lang] || dict['EN'];
   return langDict[key] || dict['EN'][key] || key;
 }
-// CONCATENATED MODULE: ./src/utils/table-util.js
-
-function getColToolCellIndexByBoundary(cells, boundary, conditionFn, container) {
-  return cells.reduce((findIndex, cell) => {
-    let cellRect = getRelativeRect(cell.getBoundingClientRect(), container);
-    if (conditionFn(cellRect, boundary)) {
-      findIndex = cells.indexOf(cell);
-    }
-    return findIndex;
-  }, false);
-}
-function getColToolCellIndexesByBoundary(cells, boundary, conditionFn, container) {
-  return cells.reduce((findIndexes, cell) => {
-    let cellRect = getRelativeRect(cell.getBoundingClientRect(), container);
-    if (conditionFn(cellRect, boundary)) {
-      findIndexes.push(cells.indexOf(cell));
-    }
-    return findIndexes;
-  }, []);
-}
-
 // CONCATENATED MODULE: ./src/modules/table-operation-menu.js
 
 
@@ -2344,9 +2510,9 @@ const MENU_ITEMS_DEFAULT = {
       const cells = rightCell.domNode.parentNode.querySelectorAll('.quill-table__cell');
       let colIndex = Array.from(cells).indexOf(rightCell.domNode);
       const newColumn = tableContainer.insertColumn(this.boundary, colIndex, true, this.quill.root.parentNode);
-      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
+      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
       this.quill.setSelection(this.quill.getIndex(newColumn[0]), 0, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
-      this.tableSelection.setSelection(newColumn[0].domNode.getBoundingClientRect(), newColumn[0].domNode.getBoundingClientRect());
+      this.tableSelection.setSelection(newColumn[0].domNode, newColumn[0].domNode);
       this.tableColumnTool.updateToolCells();
     }
   },
@@ -2359,9 +2525,9 @@ const MENU_ITEMS_DEFAULT = {
       const cells = leftCell.domNode.parentNode.querySelectorAll('.quill-table__cell');
       let colIndex = Array.from(cells).indexOf(leftCell.domNode);
       const newColumn = tableContainer.insertColumn(this.boundary, colIndex, false, this.quill.root.parentNode);
-      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
+      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
       this.quill.setSelection(this.quill.getIndex(newColumn[0]), 0, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
-      this.tableSelection.setSelection(newColumn[0].domNode.getBoundingClientRect(), newColumn[0].domNode.getBoundingClientRect());
+      this.tableSelection.setSelection(newColumn[0].domNode, newColumn[0].domNode);
       this.tableColumnTool.updateToolCells();
     }
   },
@@ -2371,9 +2537,9 @@ const MENU_ITEMS_DEFAULT = {
     handler() {
       const tableContainer = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(this.table);
       const affectedCells = tableContainer.insertRow(this.boundary, false, this.quill.root.parentNode);
-      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
+      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
       this.quill.setSelection(this.quill.getIndex(affectedCells[0]), 0, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
-      this.tableSelection.setSelection(affectedCells[0].domNode.getBoundingClientRect(), affectedCells[0].domNode.getBoundingClientRect());
+      this.tableSelection.setSelection(affectedCells[0].domNode, affectedCells[0].domNode);
     }
   },
   insertRowDown: {
@@ -2382,9 +2548,9 @@ const MENU_ITEMS_DEFAULT = {
     handler() {
       const tableContainer = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(this.table);
       const affectedCells = tableContainer.insertRow(this.boundary, true, this.quill.root.parentNode);
-      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
+      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
       this.quill.setSelection(this.quill.getIndex(affectedCells[0]), 0, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
-      this.tableSelection.setSelection(affectedCells[0].domNode.getBoundingClientRect(), affectedCells[0].domNode.getBoundingClientRect());
+      this.tableSelection.setSelection(affectedCells[0].domNode, affectedCells[0].domNode);
     }
   },
   mergeCells: {
@@ -2410,8 +2576,8 @@ const MENU_ITEMS_DEFAULT = {
         return sum;
       }, 0);
       const mergedCell = tableContainer.mergeCells(this.boundary, this.selectedTds, rowspan, colspan, this.quill.root.parentNode);
-      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
-      this.tableSelection.setSelection(mergedCell.domNode.getBoundingClientRect(), mergedCell.domNode.getBoundingClientRect());
+      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
+      this.tableSelection.setSelection(mergedCell.domNode, mergedCell.domNode);
     }
   },
   unmergeCells: {
@@ -2420,7 +2586,7 @@ const MENU_ITEMS_DEFAULT = {
     handler() {
       const tableContainer = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(this.table);
       tableContainer.unmergeCells(this.selectedTds, this.quill.root.parentNode);
-      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
+      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
       this.tableSelection.clearSelection();
     }
   },
@@ -2434,7 +2600,7 @@ const MENU_ITEMS_DEFAULT = {
       }, this.quill.root.parentNode);
       let isDeleteTable = tableContainer.deleteColumns(this.boundary, colIndexes, this.quill.root.parentNode);
       if (!isDeleteTable) {
-        this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
+        this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
         this.tableSelection.clearSelection();
         this.tableColumnTool.updateToolCells();
       }
@@ -2446,7 +2612,7 @@ const MENU_ITEMS_DEFAULT = {
     handler() {
       const tableContainer = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(this.table);
       tableContainer.deleteRow(this.boundary, this.quill.root.parentNode);
-      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
+      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
       this.tableSelection.clearSelection();
     }
   },
@@ -2458,7 +2624,7 @@ const MENU_ITEMS_DEFAULT = {
       const tableContainer = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(this.table);
       betterTableModule.hideTableTools();
       tableContainer.remove();
-      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
+      this.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
     }
   }
 };
@@ -2810,51 +2976,6 @@ function matchTable(node, delta) {
     }, new Delta());
   }
 }
-// CONCATENATED MODULE: ./src/modules/table-context-menu-button.js
-
-class table_context_menu_button_TableContextMenuButton {
-  constructor(quill, options) {
-    this.quill = quill;
-    this.cellNode = options.cellNode;
-    this.init(options);
-  }
-  init({
-    tableNode,
-    rowNode
-  }) {
-    if (this.domNode) {
-      this.hideContextMenuButton();
-    }
-    const parent = this.quill.root.parentNode;
-    this.domNode = document.createElement('button');
-    this.domNode.classList.add('quill-table-operation-menu__context-btn');
-    this.domNode.type = 'button';
-    this.domNode.addEventListener('click', evt => {
-      const quillTable = this.quill.getModule('quill-table');
-      const tableSelection = quillTable.tableSelection;
-      if (tableSelection && tableSelection.selectedTds.length <= 1) {
-        tableSelection.highlitSelection(this.cellNode);
-      }
-      quillTable.showTableOperationMenu(tableNode, rowNode, this.cellNode, evt);
-    });
-    this.calculateButtonPosition();
-    parent.appendChild(this.domNode);
-  }
-  calculateButtonPosition() {
-    const parent = this.quill.root.parentNode;
-    const cellRect = getRelativeRect(this.cellNode.getBoundingClientRect(), parent);
-    css(this.domNode, {
-      top: `${cellRect.y}px`,
-      left: `${cellRect.x1}px`
-    });
-  }
-  destroy() {
-    if (this.domNode) {
-      this.domNode.remove();
-    }
-    return null;
-  }
-}
 // CONCATENATED MODULE: ./src/quill-table.js
 
 
@@ -2862,7 +2983,6 @@ class table_context_menu_button_TableContextMenuButton {
 
 
 // import table node matchers
-
 
 
 
@@ -2925,18 +3045,14 @@ class quill_table_QuillTable extends Module {
         tableNode: null
       });
       if (tableNode) {
-        if (cellNode) {
-          this.showContextMenuButton(tableNode, rowNode, cellNode);
-        }
         // current table clicked
         if (this.table === tableNode) return;
         // other table clicked
         if (this.table) this.hideTableTools();
-        this.showTableTools(tableNode, cellNode, quill, options);
+        this.showTableTools(tableNode, rowNode, cellNode, quill, options);
       } else if (this.table) {
         // other clicked
         this.hideTableTools();
-        this.hideContextMenuButton();
       }
     }, false);
 
@@ -2959,7 +3075,7 @@ class quill_table_QuillTable extends Module {
       })[0];
       let isTargetCellSelected = this.tableSelection.selectedTds.map(tableCell => tableCell.domNode).includes(cellNode);
       if (this.tableSelection.selectedTds.length <= 0 || !isTargetCellSelected) {
-        this.tableSelection.setSelection(cellNode.getBoundingClientRect(), cellNode.getBoundingClientRect());
+        this.tableSelection.setSelection(cellNode, cellNode);
       }
       this.showTableOperationMenu(tableNode, rowNode, cellNode, evt);
     }, false);
@@ -2980,6 +3096,8 @@ class quill_table_QuillTable extends Module {
     let thisBindings = quill.keyboard.bindings.Backspace.slice(quill.keyboard.bindings.Backspace.length - 2, quill.keyboard.bindings.Backspace.length);
     quill.keyboard.bindings.Backspace.splice(0, 2, ...thisBindings);
     quill.keyboard.bindings.Backspace.splice(quill.keyboard.bindings.Backspace.length - 2, 2);
+    const tableTabBinding = quill.keyboard.bindings.Tab[quill.keyboard.bindings.Tab.length - 1];
+    quill.keyboard.bindings.Tab.splice(0, 1, tableTabBinding);
     // add Matchers to match and render quill-better-table for initialization
     // or pasting
     quill.clipboard.addMatcher('td', matchTableCell);
@@ -2991,16 +3109,13 @@ class quill_table_QuillTable extends Module {
     quill.clipboard.matchers = quill.clipboard.matchers.filter(matcher => {
       return matcher[0] !== 'tr';
     });
-    this.quill.on('editor-change', () => {
-      this.hideContextMenuButton();
+    this.quill.on('selection-change', range => {
+      this.correctSelection(range);
     });
     window.addEventListener('resize', () => {
       if (this.columnTool) {
         this.columnTool.updateToolCells();
         this.columnTool.updateToolWidth();
-      }
-      if (this.contextMenuButton) {
-        this.contextMenuButton.calculateButtonPosition();
       }
       if (this.tableSelection) {
         this.tableSelection.refreshHelpLinesPosition();
@@ -3050,7 +3165,25 @@ class quill_table_QuillTable extends Module {
       }, memo);
     }, delta);
     this.quill.updateContents(delta, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
-    this.quill.setSelection(range.index + columns + 1, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.API);
+    const rangeForSelect = range.index + columns + 1;
+    this.quill.setSelection(rangeForSelect, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.API);
+    const [line] = this.quill.getLine(rangeForSelect);
+    if (!isTableCellLine(line)) {
+      return;
+    }
+    const cell = line.parent;
+    if (!cell) {
+      return;
+    }
+    const row = cell.parent;
+    if (!row) {
+      return;
+    }
+    const tableNode = row.domNode.closest('table');
+    if (!tableNode) {
+      return;
+    }
+    this.showTableTools(tableNode, row.domNode, cell.domNode, this.quill, this.options);
   }
   tableInsertColumn(columnType) {
     const tableContainer = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(this.table);
@@ -3064,7 +3197,7 @@ class quill_table_QuillTable extends Module {
     tableColumnTool.updateToolCells();
     tableSelection.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
     tableSelection.quill.setSelection(tableSelection.quill.getIndex(newColumn[0]), 0, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
-    tableSelection.setSelection(newColumn[0].domNode.getBoundingClientRect(), newColumn[0].domNode.getBoundingClientRect());
+    tableSelection.setSelection(newColumn[0].domNode, newColumn[0].domNode);
   }
   insertColumnLeft() {
     this.tableInsertColumn('left');
@@ -3078,7 +3211,7 @@ class quill_table_QuillTable extends Module {
     const affectedCells = tableContainer.insertRow(tableSelection.boundary, rowType === 'below', tableSelection.quill.root.parentNode);
     tableSelection.quill.update(external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
     tableSelection.quill.setSelection(tableSelection.quill.getIndex(affectedCells[0]), 0, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.SILENT);
-    tableSelection.setSelection(affectedCells[0].domNode.getBoundingClientRect(), affectedCells[0].domNode.getBoundingClientRect());
+    tableSelection.setSelection(affectedCells[0].domNode, affectedCells[0].domNode);
   }
   insertRowAbove() {
     this.tableInsertRow('above');
@@ -3112,10 +3245,14 @@ class quill_table_QuillTable extends Module {
     const tableContainer = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(this.table);
     tableContainer.tableDestroy();
   }
-  showTableTools(table, cellNode, quill, options) {
+  showTableTools(table, rowNode, cellNode, quill, options) {
     this.table = table;
     this.columnTool = new table_column_tool_TableColumnTool(table, quill, options);
-    this.tableSelection = new table_selection_TableSelection(table, cellNode, quill, options);
+    this.tableSelection = new table_selection_TableSelection({
+      table,
+      row: rowNode,
+      cell: cellNode
+    }, quill, options);
   }
   hideTableTools() {
     this.columnTool && this.columnTool.destroy();
@@ -3141,26 +3278,10 @@ class quill_table_QuillTable extends Module {
       }, 0);
     }
   }
-  showContextMenuButton(tableNode, rowNode, cellNode) {
-    if (this.contextMenuButton) {
-      this.hideContextMenuButton();
-    }
-    this.contextMenuButton = new table_context_menu_button_TableContextMenuButton(this.quill, {
-      tableNode,
-      rowNode,
-      cellNode
-    });
-  }
-  hideContextMenuButton() {
-    if (!this.contextMenuButton) {
-      return;
-    }
-    this.contextMenuButton = this.contextMenuButton.destroy();
-  }
   tableDeletionProtection(range, context) {
     if (range.index === 0 || this.quill.getLength() <= 1) return true;
     const [line] = this.quill.getLine(range.index);
-    if (context.event.shiftKey && line.statics.blotName === 'table-cell-line') {
+    if (context.event.shiftKey && isTableCellLine(line)) {
       return false;
     }
     if (this.tableSelection && this.tableSelection.selectedTds && this.tableSelection.selectedTds.length > 1) {
@@ -3169,10 +3290,49 @@ class quill_table_QuillTable extends Module {
     if (context.offset === 0) {
       const [prev] = this.quill.getLine(range.index - 1);
       if (prev != null) {
-        if (prev.statics.blotName === 'table-cell-line' && line.statics.blotName !== 'table-cell-line') return false;
+        if (isTableCellLine(prev) && !isTableCellLine(line)) return false;
       }
     }
     return true;
+  }
+  correctSelection(range) {
+    if (!range) {
+      return;
+    }
+    const lines = this.quill.getLines(range);
+    if (lines.length === 0) {
+      const [line] = this.quill.getLine(range.index);
+      if (!isTableCellLine(line)) {
+        return;
+      }
+      if (!this.tableSelection) {
+        this.showTableTools(this.table, line.domNode.closest('tr'), line.parent.domNode, this.quill, this.options);
+      } else if (this.tableSelection.selectedTds.length === 1) {
+        this.tableSelection.setSelection(line.parent.domNode, line.parent.domNode);
+      }
+      return;
+    }
+    const cellTextLines = lines.filter(line => isTableCellLine(line));
+    const cellTextLinesLength = cellTextLines.length;
+    if (cellTextLinesLength === 0) {
+      return;
+    }
+    const firstCell = cellTextLines[0];
+    const firstLineIndex = this.quill.getIndex(firstCell);
+    const firstCellContentLength = firstCell.domNode.textContent.length;
+    if (lines.length === 1 && cellTextLinesLength === 1) {
+      // when try to select empty cell disable selection
+      if (firstCellContentLength === 0) {
+        this.quill.setSelection(firstLineIndex);
+        return;
+      }
+      if (!firstCell.parent.next && range.length >= firstCellContentLength) {
+        this.quill.setSelection(firstLineIndex, firstCellContentLength);
+      }
+      return;
+    }
+    const linesLength = lines.reduce((acc, line) => acc += line.domNode.textContent.length, 0);
+    this.quill.setSelection(firstLineIndex, linesLength + cellTextLinesLength - 1);
   }
 }
 quill_table_QuillTable.keyboardBindings = {
@@ -3183,7 +3343,7 @@ quill_table_QuillTable.keyboardBindings = {
     offset: 0,
     handler(range) {
       const [line] = this.quill.getLine(range.index);
-      return !(!line.prev || line.prev.statics.blotName !== 'table-cell-line');
+      return !(!line.prev || !isTableCellLine(line.prev));
     }
   },
   'table-cell-line delete': {
@@ -3226,6 +3386,8 @@ quill_table_QuillTable.keyboardBindings = {
   },
   'table-cell-line up': makeTableArrowHandler(true),
   'table-cell-line down': makeTableArrowHandler(false),
+  'table-cell-line up shift': makeTableArrowHandler(true, true),
+  'table-cell-line down shift': makeTableArrowHandler(false, true),
   'down-to-table': {
     key: 'ArrowDown',
     collapsed: true,
@@ -3254,13 +3416,35 @@ quill_table_QuillTable.keyboardBindings = {
       }
       return true;
     }
+  },
+  'table-cell-line tab': {
+    key: 'Tab',
+    format: ['table-cell-line'],
+    handler(range, context) {
+      if (!isTableCellLine(context.line)) {
+        return true;
+      }
+      const tableCell = context.line.parent;
+      if (tableCell.next) {
+        const index = this.quill.getIndex(context.line.parent.next);
+        this.quill.setSelection(index, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
+        return false;
+      }
+      if (tableCell.parent.next && tableCell.parent.next.children.length > 0) {
+        const index = this.quill.getIndex(tableCell.parent.next.children.head);
+        this.quill.setSelection(index, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
+        return false;
+      }
+      return false;
+    }
   }
 };
 quill_table_QuillTable.requiredTableFormats = ['table', 'table-cell-line', 'table-row', 'table-body', 'table-col', 'table-col-group', 'table-container', 'table-view'];
-function makeTableArrowHandler(up) {
+function makeTableArrowHandler(up, useShift = false) {
   return {
     key: up ? 'ArrowUp' : 'ArrowDown',
     collapsed: true,
+    shiftKey: useShift,
     format: ['table-cell-line'],
     handler(range, context) {
       // TODO move to table module
@@ -3301,7 +3485,10 @@ function makeTableArrowHandler(up) {
   };
 }
 function isInTableCell(current) {
-  return current.domNode.closest && current.domNode.closest('table');
+  return Boolean(current.domNode.closest && current.domNode.closest('table'));
+}
+function isTableCellLine(current) {
+  return current.statics.blotName === 'table-cell-line';
 }
 /* harmony default export */ var quill_table = __webpack_exports__["default"] = (quill_table_QuillTable);
 
