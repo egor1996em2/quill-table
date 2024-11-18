@@ -144,7 +144,7 @@ export default class TableSelection {
         const startTdRect = getRelativeRect(startTd.getBoundingClientRect(), this.quill.root.parentNode);
         this.boundary = computeBoundaryFromRects(startTdRect, startTdRect);
         this.correctBoundary();
-        this.selectedTds = this.computeSelectedTds(target, target);
+        this.selectedTds = this.computeSelectedTds(startTd, startTd);
         this.repositionHelpLines();
         this.showContextMenuButton(startTd);
 

@@ -232,7 +232,7 @@ class QuillTable extends Module {
         this.quill.setSelection(rangeForSelect, Quill.sources.API);
         const [line] = this.quill.getLine(rangeForSelect);
 
-        if (line.statics.blotName !== 'table-cell-line') {
+        if (!isTableCellLine(line)) {
             return;
         }
 
@@ -281,10 +281,7 @@ class QuillTable extends Module {
         tableColumnTool.updateToolCells();
         tableSelection.quill.update(Quill.sources.USER);
         tableSelection.quill.setSelection(tableSelection.quill.getIndex(newColumn[0]), 0, Quill.sources.SILENT);
-        tableSelection.setSelection(
-            newColumn[0].domNode,
-            newColumn[0].domNode
-        );
+        tableSelection.setSelection(newColumn[0].domNode, newColumn[0].domNode);
     }
 
     insertColumnLeft() {
@@ -306,10 +303,7 @@ class QuillTable extends Module {
         );
         tableSelection.quill.update(Quill.sources.USER);
         tableSelection.quill.setSelection(tableSelection.quill.getIndex(affectedCells[0]), 0, Quill.sources.SILENT);
-        tableSelection.setSelection(
-            affectedCells[0].domNode,
-            affectedCells[0].domNode
-        );
+        tableSelection.setSelection(affectedCells[0].domNode, affectedCells[0].domNode);
     }
 
     insertRowAbove() {
@@ -411,7 +405,7 @@ class QuillTable extends Module {
 
         const [line] = this.quill.getLine(range.index);
 
-        if (context.event.shiftKey && line.statics.blotName === 'table-cell-line') {
+        if (context.event.shiftKey && isTableCellLine(line)) {
             return false;
         }
 
@@ -422,8 +416,7 @@ class QuillTable extends Module {
         if (context.offset === 0) {
             const [prev] = this.quill.getLine(range.index - 1);
             if (prev != null) {
-                if (prev.statics.blotName === 'table-cell-line' && line.statics.blotName !== 'table-cell-line')
-                    return false;
+                if (isTableCellLine(prev) && !isTableCellLine(line)) return false;
             }
         }
         return true;
@@ -435,7 +428,29 @@ class QuillTable extends Module {
         }
 
         const lines = this.quill.getLines(range);
-        const cellTextLines = lines.filter(line => line.statics.blotName === 'table-cell-line');
+
+        if (lines.length === 0) {
+            const [line] = this.quill.getLine(range.index);
+
+            if (!isTableCellLine(line)) {
+                return;
+            }
+
+            if (!this.tableSelection) {
+                this.showTableTools(
+                    this.table,
+                    line.domNode.closest('tr'),
+                    line.parent.domNode,
+                    this.quill,
+                    this.options
+                );
+            } else if (this.tableSelection.selectedTds.length === 1) {
+                this.tableSelection.setSelection(line.parent.domNode, line.parent.domNode);
+            }
+            return;
+        }
+
+        const cellTextLines = lines.filter(line => isTableCellLine(line));
         const cellTextLinesLength = cellTextLines.length;
 
         if (cellTextLinesLength === 0) {
@@ -473,7 +488,7 @@ QuillTable.keyboardBindings = {
         offset: 0,
         handler(range) {
             const [line] = this.quill.getLine(range.index);
-            return !(!line.prev || line.prev.statics.blotName !== 'table-cell-line');
+            return !(!line.prev || !isTableCellLine(line.prev));
         },
     },
 
@@ -622,6 +637,10 @@ function makeTableArrowHandler(up, useShift = false) {
 
 function isInTableCell(current) {
     return Boolean(current.domNode.closest && current.domNode.closest('table'));
+}
+
+function isTableCellLine(current) {
+    return current.statics.blotName === 'table-cell-line';
 }
 
 export default QuillTable;
