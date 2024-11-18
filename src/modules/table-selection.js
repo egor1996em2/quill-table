@@ -25,7 +25,7 @@ export default class TableSelection {
         this.quill.root.addEventListener('mousedown', this.selectingHandler, false);
         this.quill.root.addEventListener('keydown', () => this.selectCell(), false);
         this.quill.on('text-change', delta => {
-            if (this.selectedTds.length === 0) {
+            if (this.selectedTds.length <= 1) {
                 return;
             }
 

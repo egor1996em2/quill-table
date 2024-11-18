@@ -231,7 +231,33 @@ class QuillTable extends Module {
         }, delta);
 
         this.quill.updateContents(delta, Quill.sources.USER);
-        this.quill.setSelection(range.index + columns + 1, Quill.sources.API);
+        const rangeForSelect = range.index + columns + 1;
+        this.quill.setSelection(rangeForSelect, Quill.sources.API);
+        const [line] = this.quill.getLine(rangeForSelect);
+
+        if (line.statics.blotName !== 'table-cell-line') {
+            return;
+        }
+
+        const cell = line.parent;
+
+        if (!cell) {
+            return;
+        }
+
+        const row = cell.parent;
+
+        if (!row) {
+            return;
+        }
+
+        const tableNode = row.domNode.closest('table');
+
+        if (!tableNode) {
+            return;
+        }
+
+        this.showTableTools(tableNode, row.domNode, cell.domNode, this.quill, this.options);
     }
 
     tableInsertColumn(columnType) {
