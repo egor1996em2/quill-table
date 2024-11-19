@@ -156,8 +156,12 @@ class QuillTable extends Module {
         );
         quill.keyboard.bindings.Backspace.splice(0, 2, ...thisBindings);
         quill.keyboard.bindings.Backspace.splice(quill.keyboard.bindings.Backspace.length - 2, 2);
-        const tableTabBinding = quill.keyboard.bindings.Tab[quill.keyboard.bindings.Tab.length - 1];
-        quill.keyboard.bindings.Tab.splice(0, 1, tableTabBinding);
+        const tableTabBinding = quill.keyboard.bindings.Tab.slice(
+            quill.keyboard.bindings.Tab.length - 2,
+            quill.keyboard.bindings.Tab.length
+        );
+        quill.keyboard.bindings.Tab.splice(0, 2, ...tableTabBinding);
+        quill.keyboard.bindings.Tab.splice(quill.keyboard.bindings.Tab.length - 2, 2);
         // add Matchers to match and render quill-better-table for initialization
         // or pasting
         quill.clipboard.addMatcher('td', matchTableCell);
@@ -625,6 +629,37 @@ QuillTable.keyboardBindings = {
 
             if (tableCell.parent.next && tableCell.parent.next.children.length > 0) {
                 const index = this.quill.getIndex(tableCell.parent.next.children.head);
+                this.quill.setSelection(index, Quill.sources.USER);
+                return false;
+            }
+
+            return false;
+        },
+    },
+
+    'table-cell-line shiftKey tab': {
+        key: 'Tab',
+        shiftKey: true,
+        format: ['table-cell-line'],
+        handler(range, context) {
+            if (!isTableCellLine(context.line)) {
+                return true;
+            }
+
+            const tableCell = context.line.parent;
+
+            if (tableCell.prev) {
+                const index = this.quill.getIndex(context.line.parent.prev);
+                this.quill.setSelection(index, Quill.sources.USER);
+                return false;
+            } else if (tableCell.parent.prev && tableCell.parent.prev.children.length > 0) {
+                const index = this.quill.getIndex(tableCell.parent.prev.children.tail);
+                this.quill.setSelection(index, Quill.sources.USER);
+                return false;
+            }
+
+            if (tableCell.parent.prev && tableCell.parent.prev.children.length > 0) {
+                const index = this.quill.getIndex(tableCell.parent.prev.children.head);
                 this.quill.setSelection(index, Quill.sources.USER);
                 return false;
             }
