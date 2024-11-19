@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "ba1edeaa40be1e44c735";
+/******/ 	var hotCurrentHash = "fd24faf133236d33ef95";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -1061,7 +1061,6 @@ class table_column_tool_TableColumnTool {
           } else {
             toolCell = existCells[index];
             const colWidthRate = colWidth / tableWidth * 100;
-
             // set tool cell width
             css(toolCell, {
               width: `${colWidthRate}%`
@@ -2231,7 +2230,7 @@ class table_selection_TableSelection {
       }
       mouseLeaveTimeout = setTimeout(() => {
         mouseUpHandler();
-      }, 1000);
+      }, 550);
     }
   }
   highlitSelection(target) {
@@ -3096,8 +3095,9 @@ class quill_table_QuillTable extends Module {
     let thisBindings = quill.keyboard.bindings.Backspace.slice(quill.keyboard.bindings.Backspace.length - 2, quill.keyboard.bindings.Backspace.length);
     quill.keyboard.bindings.Backspace.splice(0, 2, ...thisBindings);
     quill.keyboard.bindings.Backspace.splice(quill.keyboard.bindings.Backspace.length - 2, 2);
-    const tableTabBinding = quill.keyboard.bindings.Tab[quill.keyboard.bindings.Tab.length - 1];
-    quill.keyboard.bindings.Tab.splice(0, 1, tableTabBinding);
+    const tableTabBinding = quill.keyboard.bindings.Tab.slice(quill.keyboard.bindings.Tab.length - 2, quill.keyboard.bindings.Tab.length);
+    quill.keyboard.bindings.Tab.splice(0, 2, ...tableTabBinding);
+    quill.keyboard.bindings.Tab.splice(quill.keyboard.bindings.Tab.length - 2, 2);
     // add Matchers to match and render quill-better-table for initialization
     // or pasting
     quill.clipboard.addMatcher('td', matchTableCell);
@@ -3281,7 +3281,11 @@ class quill_table_QuillTable extends Module {
   tableDeletionProtection(range, context) {
     if (range.index === 0 || this.quill.getLength() <= 1) return true;
     const [line] = this.quill.getLine(range.index);
-    if (context.event.shiftKey && isTableCellLine(line)) {
+    const isTableLine = isTableCellLine(line);
+    if ((!this.tableSelection || this.tableSelection.selectedTds && this.tableSelection.selectedTds.length === 0) && isTableLine) {
+      return false;
+    }
+    if (context.event.shiftKey && isTableLine) {
       return false;
     }
     if (this.tableSelection && this.tableSelection.selectedTds && this.tableSelection.selectedTds.length > 1) {
@@ -3290,7 +3294,7 @@ class quill_table_QuillTable extends Module {
     if (context.offset === 0) {
       const [prev] = this.quill.getLine(range.index - 1);
       if (prev != null) {
-        if (isTableCellLine(prev) && !isTableCellLine(line)) return false;
+        if (isTableCellLine(prev) && !isTableLine) return false;
       }
     }
     return true;
@@ -3417,6 +3421,26 @@ quill_table_QuillTable.keyboardBindings = {
       return true;
     }
   },
+  'table-cell-line shortKey a': {
+    key: 'a',
+    shortKey: true,
+    format: ['table-cell-line'],
+    handler(range, context) {
+      if (!range || !isTableCellLine(context.line)) {
+        return;
+      }
+      const cell = context.line.parent;
+      let childrenLength = 0;
+      let currentChild = cell.children.head;
+      while (currentChild) {
+        childrenLength += currentChild.domNode.textContent.length;
+        currentChild = currentChild.next;
+      }
+      const lineBreaks = cell.children.length - 1;
+      const index = this.quill.getIndex(cell.children.head);
+      this.quill.setSelection(index, childrenLength + lineBreaks);
+    }
+  },
   'table-cell-line tab': {
     key: 'Tab',
     format: ['table-cell-line'],
@@ -3432,6 +3456,32 @@ quill_table_QuillTable.keyboardBindings = {
       }
       if (tableCell.parent.next && tableCell.parent.next.children.length > 0) {
         const index = this.quill.getIndex(tableCell.parent.next.children.head);
+        this.quill.setSelection(index, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
+        return false;
+      }
+      return false;
+    }
+  },
+  'table-cell-line shiftKey tab': {
+    key: 'Tab',
+    shiftKey: true,
+    format: ['table-cell-line'],
+    handler(range, context) {
+      if (!isTableCellLine(context.line)) {
+        return true;
+      }
+      const tableCell = context.line.parent;
+      if (tableCell.prev) {
+        const index = this.quill.getIndex(context.line.parent.prev);
+        this.quill.setSelection(index, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
+        return false;
+      } else if (tableCell.parent.prev && tableCell.parent.prev.children.length > 0) {
+        const index = this.quill.getIndex(tableCell.parent.prev.children.tail);
+        this.quill.setSelection(index, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
+        return false;
+      }
+      if (tableCell.parent.prev && tableCell.parent.prev.children.length > 0) {
+        const index = this.quill.getIndex(tableCell.parent.prev.children.head);
         this.quill.setSelection(index, external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.sources.USER);
         return false;
       }

@@ -201,6 +201,11 @@ table .quill-table__cell {
 	touch-action: none;
 }
 
+.quill-table-col-tool__cell:last-child .quill-table-col-tool__cell-holder {
+    display: none;
+    pointer-events: none;
+}
+
 .quill-table-col-tool__cell-holder:hover {
     background-color: #3C87EB;
 }
