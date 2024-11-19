@@ -409,7 +409,11 @@ class QuillTable extends Module {
 
         const isTableLine = isTableCellLine(line);
 
-        if ((!this.tableSelection || this.tableSelection.selectedTds.length === 0) && isTableLine) {
+        if (
+            (!this.tableSelection ||
+                (this.tableSelection.selectedTds && this.tableSelection.selectedTds.length === 0)) &&
+            isTableLine
+        ) {
             return false;
         }
 
@@ -427,6 +431,7 @@ class QuillTable extends Module {
                 if (isTableCellLine(prev) && !isTableLine) return false;
             }
         }
+
         return true;
     }
 
@@ -575,6 +580,30 @@ QuillTable.keyboardBindings = {
                 return false;
             }
             return true;
+        },
+    },
+
+    'table-cell-line shortKey a': {
+        key: 'a',
+        shortKey: true,
+        format: ['table-cell-line'],
+        handler(range, context) {
+            if (!range || !isTableCellLine(context.line)) {
+                return;
+            }
+
+            const cell = context.line.parent;
+
+            let childrenLength = 0;
+            let currentChild = cell.children.head;
+            while (currentChild) {
+                childrenLength += currentChild.domNode.textContent.length;
+                currentChild = currentChild.next;
+            }
+
+            const lineBreaks = cell.children.length - 1;
+            const index = this.quill.getIndex(cell.children.head);
+            this.quill.setSelection(index, childrenLength + lineBreaks);
         },
     },
 
