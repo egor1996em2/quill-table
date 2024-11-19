@@ -143,7 +143,7 @@ export default class TableSelection {
 
             mouseLeaveTimeout = setTimeout(() => {
                 mouseUpHandler();
-            }, 1000);
+            }, 550);
         }
     }
 
