@@ -680,6 +680,14 @@ QuillTable.requiredTableFormats = [
     'table-view',
 ];
 
+QuillTable.selectorsForExclude = [
+    '.quill-table__wrapper',
+    '.quill-table-operation-menu__context-btn',
+    '.quill-table__selection-line',
+    '.quill-table-operation-menu',
+    '.quill-table-col-tool',
+];
+
 function makeTableArrowHandler(up, useShift = false) {
     return {
         key: up ? 'ArrowUp' : 'ArrowDown',
