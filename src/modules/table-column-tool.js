@@ -83,7 +83,6 @@ export default class TableColumnTool {
                     } else {
                         toolCell = existCells[index];
                         const colWidthRate = (colWidth / tableWidth) * 100;
-
                         // set tool cell width
                         css(toolCell, {
                             width: `${colWidthRate}%`,
