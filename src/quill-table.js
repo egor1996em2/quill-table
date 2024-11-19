@@ -407,7 +407,13 @@ class QuillTable extends Module {
 
         const [line] = this.quill.getLine(range.index);
 
-        if (context.event.shiftKey && isTableCellLine(line)) {
+        const isTableLine = isTableCellLine(line);
+
+        if ((!this.tableSelection || this.tableSelection.selectedTds.length === 0) && isTableLine) {
+            return false;
+        }
+
+        if (context.event.shiftKey && isTableLine) {
             return false;
         }
 
@@ -418,7 +424,7 @@ class QuillTable extends Module {
         if (context.offset === 0) {
             const [prev] = this.quill.getLine(range.index - 1);
             if (prev != null) {
-                if (isTableCellLine(prev) && !isTableCellLine(line)) return false;
+                if (isTableCellLine(prev) && !isTableLine) return false;
             }
         }
         return true;
