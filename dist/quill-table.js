@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "fd24faf133236d33ef95";
+/******/ 	var hotCurrentHash = "eda65c6ce81a4889c06c";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -3490,6 +3490,7 @@ quill_table_QuillTable.keyboardBindings = {
   }
 };
 quill_table_QuillTable.requiredTableFormats = ['table', 'table-cell-line', 'table-row', 'table-body', 'table-col', 'table-col-group', 'table-container', 'table-view'];
+quill_table_QuillTable.selectorsForExclude = ['.quill-table__wrapper', '.quill-table-operation-menu__context-btn', '.quill-table__selection-line', '.quill-table-operation-menu', '.quill-table-col-tool'];
 function makeTableArrowHandler(up, useShift = false) {
   return {
     key: up ? 'ArrowUp' : 'ArrowDown',
