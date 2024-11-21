@@ -1,110 +1,78 @@
 import Quill from 'quill';
 import {css, getRelativeRect} from '../utils';
+import {translate} from '../utils/translate';
 
-// svg icons
-import operationIcon1 from '../assets/icons/icon_operation_1.svg';
-import operationIcon2 from '../assets/icons/icon_operation_2.svg';
-import operationIcon3 from '../assets/icons/icon_operation_3.svg';
-import operationIcon4 from '../assets/icons/icon_operation_4.svg';
-import operationIcon5 from '../assets/icons/icon_operation_5.svg';
-import operationIcon6 from '../assets/icons/icon_operation_6.svg';
-import operationIcon7 from '../assets/icons/icon_operation_7.svg';
-import operationIcon8 from '../assets/icons/icon_operation_8.svg';
-import operationIcon9 from '../assets/icons/icon_operation_9.svg';
-import {getColToolCellIndexByBoundary, getColToolCellIndexesByBoundary} from 'src/utils/table-util';
+import {getColToolCellIndexesByBoundary} from 'src/utils/table-util';
 import {ERROR_LIMIT} from 'src/contants';
 
 const MENU_MIN_HEIGHT = 150;
-const MENU_WIDTH = 200;
 const DEFAULT_CELL_COLORS = ['white', 'red', 'yellow', 'blue'];
 const DEFAULT_COLOR_SUBTITLE = 'Background Colors';
 
 const MENU_ITEMS_DEFAULT = {
     insertColumnRight: {
-        text: 'Insert column right',
-        iconSrc: operationIcon1,
+        text: translate('insert_column_right'),
+        iconClass: 'quill-table-operation-menu__icon-add-column-right',
         handler() {
             const tableContainer = Quill.find(this.table);
-            let colIndex = getColToolCellIndexByBoundary(
-                this.columnToolCells,
-                this.boundary,
-                (cellRect, boundary) => {
-                    return Math.abs(cellRect.x + cellRect.width - boundary.x1) <= ERROR_LIMIT;
-                },
-                this.quill.root.parentNode
-            );
+            const rightCell = this.selectedTds[this.selectedTds.length - 1];
+            const cells = rightCell.domNode.parentNode.querySelectorAll('.quill-table__cell');
+            let colIndex = Array.from(cells).indexOf(rightCell.domNode);
 
             const newColumn = tableContainer.insertColumn(this.boundary, colIndex, true, this.quill.root.parentNode);
 
-            this.tableColumnTool.updateToolCells();
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
             this.quill.setSelection(this.quill.getIndex(newColumn[0]), 0, Quill.sources.SILENT);
-            this.tableSelection.setSelection(
-                newColumn[0].domNode.getBoundingClientRect(),
-                newColumn[0].domNode.getBoundingClientRect()
-            );
+            this.tableSelection.setSelection(newColumn[0].domNode, newColumn[0].domNode);
+            this.tableColumnTool.updateToolCells();
         },
     },
 
     insertColumnLeft: {
-        text: 'Insert column left',
-        iconSrc: operationIcon2,
+        text: translate('insert_column_left'),
+        iconClass: 'quill-table-operation-menu__icon-add-column-left',
         handler() {
             const tableContainer = Quill.find(this.table);
-            let colIndex = getColToolCellIndexByBoundary(
-                this.columnToolCells,
-                this.boundary,
-                (cellRect, boundary) => {
-                    return Math.abs(cellRect.x - boundary.x) <= ERROR_LIMIT;
-                },
-                this.quill.root.parentNode
-            );
+            const leftCell = this.selectedTds[0];
+            const cells = leftCell.domNode.parentNode.querySelectorAll('.quill-table__cell');
+            let colIndex = Array.from(cells).indexOf(leftCell.domNode);
 
             const newColumn = tableContainer.insertColumn(this.boundary, colIndex, false, this.quill.root.parentNode);
 
-            this.tableColumnTool.updateToolCells();
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
             this.quill.setSelection(this.quill.getIndex(newColumn[0]), 0, Quill.sources.SILENT);
-            this.tableSelection.setSelection(
-                newColumn[0].domNode.getBoundingClientRect(),
-                newColumn[0].domNode.getBoundingClientRect()
-            );
+            this.tableSelection.setSelection(newColumn[0].domNode, newColumn[0].domNode);
+            this.tableColumnTool.updateToolCells();
         },
     },
 
     insertRowUp: {
-        text: 'Insert row up',
-        iconSrc: operationIcon3,
+        text: translate('insert_row_up'),
+        iconClass: 'quill-table-operation-menu__icon-add-column-top',
         handler() {
             const tableContainer = Quill.find(this.table);
             const affectedCells = tableContainer.insertRow(this.boundary, false, this.quill.root.parentNode);
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
             this.quill.setSelection(this.quill.getIndex(affectedCells[0]), 0, Quill.sources.SILENT);
-            this.tableSelection.setSelection(
-                affectedCells[0].domNode.getBoundingClientRect(),
-                affectedCells[0].domNode.getBoundingClientRect()
-            );
+            this.tableSelection.setSelection(affectedCells[0].domNode, affectedCells[0].domNode);
         },
     },
 
     insertRowDown: {
-        text: 'Insert row down',
-        iconSrc: operationIcon4,
+        text: translate('insert_row_bottom'),
+        iconClass: 'quill-table-operation-menu__icon-add-column-bottom',
         handler() {
             const tableContainer = Quill.find(this.table);
             const affectedCells = tableContainer.insertRow(this.boundary, true, this.quill.root.parentNode);
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
             this.quill.setSelection(this.quill.getIndex(affectedCells[0]), 0, Quill.sources.SILENT);
-            this.tableSelection.setSelection(
-                affectedCells[0].domNode.getBoundingClientRect(),
-                affectedCells[0].domNode.getBoundingClientRect()
-            );
+            this.tableSelection.setSelection(affectedCells[0].domNode, affectedCells[0].domNode);
         },
     },
 
     mergeCells: {
-        text: 'Merge selected cells',
-        iconSrc: operationIcon5,
+        text: translate('merge_cells'),
+        iconClass: 'quill-table-operation-menu__icon-merge-cells',
         handler() {
             const tableContainer = Quill.find(this.table);
             // compute merged Cell rowspan, equal to length of selected rows
@@ -138,28 +106,25 @@ const MENU_ITEMS_DEFAULT = {
                 colspan,
                 this.quill.root.parentNode
             );
-            this.quill.update(Quill.sources.USER);
-            this.tableSelection.setSelection(
-                mergedCell.domNode.getBoundingClientRect(),
-                mergedCell.domNode.getBoundingClientRect()
-            );
+            this.quill.update(Quill.sources.SILENT);
+            this.tableSelection.setSelection(mergedCell.domNode, mergedCell.domNode);
         },
     },
 
     unmergeCells: {
-        text: 'Unmerge cells',
-        iconSrc: operationIcon6,
+        text: translate('unmerge_cells'),
+        iconClass: 'quill-table-operation-menu__icon-slpit-cells',
         handler() {
             const tableContainer = Quill.find(this.table);
             tableContainer.unmergeCells(this.selectedTds, this.quill.root.parentNode);
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
             this.tableSelection.clearSelection();
         },
     },
 
     deleteColumn: {
-        text: 'Delete selected columns',
-        iconSrc: operationIcon7,
+        text: translate('delete_columns'),
+        iconClass: 'quill-table-operation-menu__icon-remove-column',
         handler() {
             const tableContainer = Quill.find(this.table);
             let colIndexes = getColToolCellIndexesByBoundary(
@@ -175,45 +140,45 @@ const MENU_ITEMS_DEFAULT = {
 
             let isDeleteTable = tableContainer.deleteColumns(this.boundary, colIndexes, this.quill.root.parentNode);
             if (!isDeleteTable) {
-                this.tableColumnTool.updateToolCells();
-                this.quill.update(Quill.sources.USER);
+                this.quill.update(Quill.sources.SILENT);
                 this.tableSelection.clearSelection();
+                this.tableColumnTool.updateToolCells();
             }
         },
     },
 
     deleteRow: {
-        text: 'Delete selected rows',
-        iconSrc: operationIcon8,
+        text: translate('delete_rows'),
+        iconClass: 'quill-table-operation-menu__icon-remove-row',
         handler() {
             const tableContainer = Quill.find(this.table);
             tableContainer.deleteRow(this.boundary, this.quill.root.parentNode);
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
             this.tableSelection.clearSelection();
         },
     },
 
     deleteTable: {
-        text: 'Delete table',
-        iconSrc: operationIcon9,
+        text: translate('delete_table'),
+        iconClass: 'quill-table-operation-menu__icon-delete-table',
         handler() {
             const betterTableModule = this.quill.getModule('quill-table');
             const tableContainer = Quill.find(this.table);
             betterTableModule.hideTableTools();
             tableContainer.remove();
-            this.quill.update(Quill.sources.USER);
+            this.quill.update(Quill.sources.SILENT);
         },
     },
 };
 
 export default class TableOperationMenu {
-    constructor(params, quill, options) {
+    constructor(params, quill, options = {}) {
         const betterTableModule = quill.getModule('quill-table');
         this.tableSelection = betterTableModule.tableSelection;
         this.table = params.table;
         this.quill = quill;
         this.options = options;
-        this.menuItems = Object.assign({}, MENU_ITEMS_DEFAULT, options.items);
+        this.menuItems = Object.assign({}, MENU_ITEMS_DEFAULT, options.items || {});
         this.tableColumnTool = betterTableModule.columnTool;
         this.boundary = this.tableSelection.boundary;
         this.selectedTds = this.tableSelection.selectedTds;
@@ -221,6 +186,7 @@ export default class TableOperationMenu {
         this.columnToolCells = this.tableColumnTool.colToolCells();
         this.colorSubTitle = options.color && options.color.text ? options.color.text : DEFAULT_COLOR_SUBTITLE;
         this.cellColors = options.color && options.color.colors ? options.color.colors : DEFAULT_CELL_COLORS;
+        this.evt = params.evt;
 
         this.menuInitial(params);
         this.mount();
@@ -229,6 +195,11 @@ export default class TableOperationMenu {
 
     mount() {
         document.body.appendChild(this.domNode);
+        const {left, top} = this.calculatePosition();
+        css(this.domNode, {
+            left: `${left}px`,
+            top: `${top}px`,
+        });
     }
 
     destroy() {
@@ -237,15 +208,13 @@ export default class TableOperationMenu {
         return null;
     }
 
-    menuInitial({left, top}) {
+    menuInitial() {
         this.domNode = document.createElement('div');
-        this.domNode.classList.add('qlbt-operation-menu');
+        this.domNode.classList.add('quill-table-operation-menu');
         css(this.domNode, {
             position: 'absolute',
-            left: `${left}px`,
-            top: `${top}px`,
             'min-height': `${MENU_MIN_HEIGHT}px`,
-            width: `${MENU_WIDTH}px`,
+            'max-width': 'min(-10px + 100vw, 300px);',
         });
 
         for (let name in this.menuItems) {
@@ -270,14 +239,14 @@ export default class TableOperationMenu {
         // create dividing line
         function dividingCreator() {
             const dividing = document.createElement('div');
-            dividing.classList.add('qlbt-operation-menu-dividing');
+            dividing.classList.add('quill-table-operation-menu__divider');
             return dividing;
         }
 
         // create subtitle for menu
         function subTitleCreator(title) {
             const subTitle = document.createElement('div');
-            subTitle.classList.add('qlbt-operation-menu-subtitle');
+            subTitle.classList.add('quill-table-operation-menu__subtitle');
             subTitle.innerText = title;
             return subTitle;
         }
@@ -286,7 +255,7 @@ export default class TableOperationMenu {
     colorsItemCreator(colors) {
         const self = this;
         const node = document.createElement('div');
-        node.classList.add('qlbt-operation-color-picker');
+        node.classList.add('quill-table-color-picker');
 
         colors.forEach(color => {
             let colorBox = colorBoxCreator(color);
@@ -295,7 +264,7 @@ export default class TableOperationMenu {
 
         function colorBoxCreator(color) {
             const box = document.createElement('div');
-            box.classList.add('qlbt-operation-color-picker-item');
+            box.classList.add('quill-table-color-picker__item');
             box.setAttribute('data-color', color);
             box.style.backgroundColor = color;
 
@@ -318,21 +287,49 @@ export default class TableOperationMenu {
         return node;
     }
 
-    menuItemCreator({text, iconSrc, handler}) {
+    menuItemCreator({text, iconClass, handler}) {
         const node = document.createElement('div');
-        node.classList.add('qlbt-operation-menu-item');
+        node.classList.add('quill-table-operation-menu__item');
 
         const iconSpan = document.createElement('span');
-        iconSpan.classList.add('qlbt-operation-menu-icon');
-        iconSpan.innerHTML = iconSrc;
+        iconSpan.classList.add('quill-table-operation-menu__icon');
+        iconSpan.classList.add(iconClass);
 
         const textSpan = document.createElement('span');
-        textSpan.classList.add('qlbt-operation-menu-text');
+        textSpan.classList.add('quill-table-operation-menu__text');
         textSpan.innerText = text;
 
         node.appendChild(iconSpan);
         node.appendChild(textSpan);
         node.addEventListener('click', handler.bind(this), false);
         return node;
+    }
+
+    calculatePosition() {
+        const GAP_X = 5;
+
+        const clickX = parseInt(this.evt.clientX, 10) || 0;
+        const clickY = parseInt(this.evt.clientY, 10) || 0;
+        const {clientWidth, clientHeight} = document.documentElement;
+        const {offsetWidth, offsetHeight} = this.domNode;
+
+        let posX = clickX + GAP_X;
+        if (clickX + offsetWidth > clientWidth - GAP_X) {
+            posX = clickX - offsetWidth - GAP_X;
+            if (posX < GAP_X) posX = GAP_X;
+        }
+
+        let posY = this.evt.pageY;
+        if (clickY + offsetHeight > clientHeight) {
+            posY = this.evt.pageY - offsetHeight;
+            if (posY < MENU_MIN_HEIGHT) {
+                posY = MENU_MIN_HEIGHT;
+            }
+        }
+
+        return {
+            top: posY,
+            left: posX,
+        };
     }
 }

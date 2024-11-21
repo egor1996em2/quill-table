@@ -1,15 +1,19 @@
 import Quill from 'quill';
 import {css, getRelativeRect} from '../utils';
 import {TableCell} from '../formats/table';
+import TableContextMenuButton from './table-context-menu-button';
+import {getElementPositionInTable} from '../utils/table-util';
 
 const PRIMARY_COLOR = '#0589f3';
 const LINE_POSITIONS = ['left', 'right', 'top', 'bottom'];
 const ERROR_LIMIT = 2;
 
 export default class TableSelection {
-    constructor(table, quill, options) {
+    constructor({table, cell, row}, quill, options) {
         if (!table) return null;
         this.table = table;
+        this.rowNode = row;
+        this.cellNode = cell;
         this.quill = quill;
         this.options = options;
         this.boundary = {}; // params for selected square
@@ -20,16 +24,34 @@ export default class TableSelection {
 
         this.helpLinesInitial();
         this.quill.root.addEventListener('mousedown', this.selectingHandler, false);
+        this.quill.root.addEventListener('keydown', () => this.selectCell(), false);
+        this.quill.on('text-change', delta => {
+            if (this.selectedTds.length === 0) {
+                return;
+            }
 
-        this.quill.on('text-change', this.clearSelectionHandler);
+            const selectedIds = this.selectedTds.slice(1);
+
+            if (this.selectedTds.length === 1) {
+                this.refreshHelpLinesPosition();
+                return;
+            }
+
+            this.clearSelectionHandler();
+            this.applyChangesForSelection(selectedIds, delta);
+        });
+
+        if (cell) {
+            this.highlitSelection(cell);
+        }
     }
 
     helpLinesInitial() {
         let parent = this.quill.root.parentNode;
         LINE_POSITIONS.forEach(direction => {
             this[direction] = document.createElement('div');
-            this[direction].classList.add('qlbt-selection-line');
-            this[direction].classList.add('qlbt-selection-line-' + direction);
+            this[direction].classList.add('quill-table__selection-line');
+            this[direction].classList.add('quill-table__selection-line-' + direction);
             css(this[direction], {
                 position: 'absolute',
                 display: 'none',
@@ -40,27 +62,50 @@ export default class TableSelection {
     }
 
     mouseDownHandler(e) {
-        if (e.button !== 0 || !e.target.closest('.quill-better-table')) return;
+        if (e.button !== 0 || !e.target.closest('.quill-table__table')) return;
+
+        let mouseLeaveTimeout = null;
+
         this.quill.root.addEventListener('mousemove', mouseMoveHandler, false);
         this.quill.root.addEventListener('mouseup', mouseUpHandler, false);
+        this.quill.root.addEventListener('mouseleave', mouseLeaveHandler, false);
+        const selectedCells = this.table.querySelectorAll('.quill-table__cell-line--selected');
+        let endTd;
+
+        selectedCells.forEach(cell => {
+            cell.classList.remove('quill-table__cell-line--selected');
+        });
+
+        const selectionLines = this.quill.root.parentNode.querySelectorAll('.quill-table__selection-line');
+        selectionLines.forEach(selectionLine => {
+            selectionLine.addEventListener('mouseup', mouseUpHandler, false);
+        });
 
         const self = this;
-        const startTd = e.target.closest('td[data-row]');
-        const startTdRect = getRelativeRect(startTd.getBoundingClientRect(), this.quill.root.parentNode);
         this.dragging = true;
-        this.boundary = computeBoundaryFromRects(startTdRect, startTdRect);
-        this.correctBoundary();
-        this.selectedTds = this.computeSelectedTds();
-        this.repositionHelpLines();
+        const {startTd, startTdRect} = this.highlitSelection(e.target);
 
         function mouseMoveHandler(e) {
-            if (e.button !== 0 || !e.target.closest('.quill-better-table')) return;
-            const endTd = e.target.closest('td[data-row]');
+            if (e.button !== 0 || !e.target.closest('.quill-table__table')) return;
+
+            if (mouseLeaveTimeout) {
+                clearTimeout(mouseLeaveTimeout);
+            }
+
+            endTd = e.target.closest('td[data-row]');
+
+            if (!endTd) {
+                return;
+            }
+
             const endTdRect = getRelativeRect(endTd.getBoundingClientRect(), self.quill.root.parentNode);
             self.boundary = computeBoundaryFromRects(startTdRect, endTdRect);
             self.correctBoundary();
-            self.selectedTds = self.computeSelectedTds();
-            self.repositionHelpLines();
+            self.selectedTds = self.computeSelectedTds(startTd, endTd);
+            setTimeout(() => {
+                self.refreshHelpLinesPosition();
+                self.showContextMenuButton(endTd);
+            }, 0);
 
             // avoid select text in multiple table-cell
             if (startTd !== endTd) {
@@ -69,10 +114,52 @@ export default class TableSelection {
         }
 
         function mouseUpHandler() {
+            if (mouseLeaveTimeout) {
+                clearTimeout(mouseLeaveTimeout);
+            }
             self.quill.root.removeEventListener('mousemove', mouseMoveHandler, false);
             self.quill.root.removeEventListener('mouseup', mouseUpHandler, false);
+            self.quill.root.removeEventListener('mouseleave', mouseLeaveHandler, false);
+            selectionLines.forEach(selectionLine => {
+                selectionLine.removeEventListener('mouseup', mouseUpHandler, false);
+            });
             self.dragging = false;
+            self.selectCell();
+            self.showContextMenuButton(endTd || startTd);
         }
+
+        function mouseLeaveHandler(evt) {
+            if (!self.dragging) {
+                return;
+            }
+
+            if (isEventFromTableParts(evt)) {
+                return;
+            }
+
+            if (mouseLeaveTimeout) {
+                clearTimeout(mouseLeaveTimeout);
+            }
+
+            mouseLeaveTimeout = setTimeout(() => {
+                mouseUpHandler();
+            }, 550);
+        }
+    }
+
+    highlitSelection(target) {
+        const startTd = target.closest('td[data-row]');
+        const startTdRect = getRelativeRect(startTd.getBoundingClientRect(), this.quill.root.parentNode);
+        this.boundary = computeBoundaryFromRects(startTdRect, startTdRect);
+        this.correctBoundary();
+        this.selectedTds = this.computeSelectedTds(startTd, startTd);
+        this.repositionHelpLines();
+        this.showContextMenuButton(startTd);
+
+        return {
+            startTd,
+            startTdRect,
+        };
     }
 
     correctBoundary() {
@@ -95,30 +182,45 @@ export default class TableSelection {
         });
     }
 
-    computeSelectedTds() {
-        const tableContainer = Quill.find(this.table);
-        const tableCells = tableContainer.descendants(TableCell);
+    computeSelectedTds(startTarget, endTarget) {
+        if (startTarget.tagName !== 'TD' || endTarget.tagName !== 'TD') {
+            return [];
+        }
 
-        return tableCells.reduce((selectedCells, tableCell) => {
-            let {x, y, width, height} = getRelativeRect(
-                tableCell.domNode.getBoundingClientRect(),
-                this.quill.root.parentNode
-            );
-            let isCellIncluded =
-                x + ERROR_LIMIT >= this.boundary.x &&
-                x - ERROR_LIMIT + width <= this.boundary.x1 &&
-                y + ERROR_LIMIT >= this.boundary.y &&
-                y - ERROR_LIMIT + height <= this.boundary.y1;
+        const rows = Array.from(this.table.querySelectorAll('tr'));
 
-            if (isCellIncluded) {
-                selectedCells.push(tableCell);
-            }
+        const startTargetPosition = getElementPositionInTable(startTarget, rows);
 
-            return selectedCells;
-        }, []);
+        if (startTargetPosition.row === null || startTargetPosition.col === null) {
+            return [];
+        }
+
+        const endTargetPosition = getElementPositionInTable(endTarget, rows);
+
+        if (!endTargetPosition.row === null || endTargetPosition.col === null) {
+            return [];
+        }
+
+        const selectedTds = [];
+
+        const {iterationStart, iterationEnd, beginSelectionIndex, endSelectionIndex} = getSelectionIterationParams(
+            startTargetPosition,
+            endTargetPosition
+        );
+
+        for (let i = iterationStart; i <= iterationEnd; i++) {
+            const tds = Array.from(rows[i].children).slice(beginSelectionIndex, endSelectionIndex + 1);
+            selectedTds.push(...tds.map(tdElement => Quill.find(tdElement)));
+        }
+
+        return selectedTds;
     }
 
     repositionHelpLines() {
+        if (!this.left || !this.right || !this.top || !this.bottom) {
+            return;
+        }
+
         const tableViewScrollLeft = this.table.parentNode.scrollLeft;
         css(this.left, {
             display: 'block',
@@ -156,6 +258,10 @@ export default class TableSelection {
     // based on selectedTds compute positions of help lines
     // It is useful when selectedTds are not changed
     refreshHelpLinesPosition() {
+        if (this.selectedTds.length === 0) {
+            return;
+        }
+
         const startRect = getRelativeRect(
             this.selectedTds[0].domNode.getBoundingClientRect(),
             this.quill.root.parentNode
@@ -164,6 +270,11 @@ export default class TableSelection {
             this.selectedTds[this.selectedTds.length - 1].domNode.getBoundingClientRect(),
             this.quill.root.parentNode
         );
+
+        if (this.contextMenuButton) {
+            this.contextMenuButton.calculateButtonPosition();
+        }
+
         this.boundary = computeBoundaryFromRects(startRect, endRect);
         this.repositionHelpLines();
     }
@@ -178,20 +289,31 @@ export default class TableSelection {
 
         this.quill.off('text-change', this.clearSelectionHandler);
 
+        this.hideContextMenuButton();
+
         return null;
     }
 
-    setSelection(startRect, endRect) {
+    setSelection(startTd, endTd) {
+        const startRect = startTd.getBoundingClientRect();
+        const endRect = endTd.getBoundingClientRect();
         this.boundary = computeBoundaryFromRects(
             getRelativeRect(startRect, this.quill.root.parentNode),
             getRelativeRect(endRect, this.quill.root.parentNode)
         );
         this.correctBoundary();
-        this.selectedTds = this.computeSelectedTds();
-        this.repositionHelpLines();
+        this.selectedTds = this.computeSelectedTds(startTd, endTd);
+        setTimeout(() => {
+            this.refreshHelpLinesPosition();
+            this.showContextMenuButton(this.selectedTds[this.selectedTds.length - 1].domNode);
+        }, 0);
     }
 
     clearSelection() {
+        if (this.selectedTds.length > 1) {
+            window.getSelection().removeAllRanges();
+        }
+
         this.boundary = {};
         this.selectedTds = [];
         LINE_POSITIONS.forEach(direction => {
@@ -200,6 +322,72 @@ export default class TableSelection {
                     display: 'none',
                 });
         });
+        this.hideContextMenuButton();
+    }
+
+    selectCell() {
+        if (this.selectedTds.length <= 1) {
+            return;
+        }
+
+        const startCell = this.selectedTds[0];
+
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+
+        const range = document.createRange();
+
+        range.setStart(startCell.domNode, 0);
+        range.setEnd(startCell.domNode, 1);
+
+        selection.addRange(range);
+
+        this.selectedTds.forEach(cell => {
+            cell.domNode.classList.add('quill-table__cell-line--selected');
+        });
+    }
+
+    keyDownButtonHandler() {
+        this.selectCell();
+    }
+
+    applyChangesForSelection(selectedIds, delta) {
+        const attributes = delta.ops.reduce((acc, op) => {
+            if (!op.attributes) {
+                return acc;
+            }
+
+            Object.entries(op.attributes).forEach(([name, val]) => {
+                acc[name] = val;
+            });
+
+            return acc;
+        }, {});
+
+        selectedIds.forEach(cell => {
+            const index = this.quill.getIndex(cell);
+            this.quill.formatLine(index, 0, attributes);
+            this.quill.formatText(index, cell.domNode.textContent.length, attributes);
+        });
+
+        this.quill.setSelection(null);
+    }
+
+    showContextMenuButton(cellNode) {
+        this.hideContextMenuButton();
+        this.contextMenuButton = new TableContextMenuButton(this.quill, {
+            tableNode: this.table,
+            rowNode: this.rowNode,
+            cellNode: cellNode,
+        });
+    }
+
+    hideContextMenuButton() {
+        if (!this.contextMenuButton) {
+            return;
+        }
+
+        this.contextMenuButton = this.contextMenuButton.destroy();
     }
 }
 
@@ -216,4 +404,24 @@ function computeBoundaryFromRects(startRect, endRect) {
     let height = y1 - y;
 
     return {x, x1, y, y1, width, height};
+}
+
+function isEventFromTableParts(evt) {
+    const isOutFromInternalElement =
+        evt.relatedTarget && evt.relatedTarget.closest && evt.relatedTarget.closest('.quill-table__wrapper');
+    const isOutFromSelectionLine =
+        evt.relatedTarget && evt.relatedTarget.classList.contains('quill-table__selection-line');
+    const isOutFromContextButton =
+        evt.relatedTarget && evt.relatedTarget.classList.contains('quill-table-operation-menu__context-btn');
+
+    return isOutFromInternalElement || isOutFromSelectionLine || isOutFromContextButton;
+}
+
+function getSelectionIterationParams(startPosition, endPosition) {
+    return {
+        iterationStart: Math.min(startPosition.row, endPosition.row),
+        iterationEnd: Math.max(startPosition.row, endPosition.row),
+        beginSelectionIndex: Math.min(startPosition.col, endPosition.col),
+        endSelectionIndex: Math.max(startPosition.col, endPosition.col),
+    };
 }

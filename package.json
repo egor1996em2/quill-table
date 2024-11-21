@@ -1,6 +1,6 @@
 {
-    "name": "quill-table",
-    "version": "1.0.0",
+    "name": "@tilda/quill-table",
+    "version": "1.7.0",
     "description": "Модуль редактора Quill с поддержкой таблиц и функций их редактирования",
     "main": "dist/quill-table.js",
     "scripts": {
@@ -11,11 +11,17 @@
         "lint": "eslint . && prettier . --check",
         "lint:fix": "eslint --fix js/**/*.js && prettier . --write"
     },
+	"exports": {
+		".": "./dist/quill-table.js",
+		"./style.css": "./dist/quill-table.css"
+	},
     "repository": {
         "type": "git",
         "url": "git+https://github.com/egor1996em2/quill-table.git"
     },
-    "dependencies": {},
+	"peerDependencies": {
+		"quill": "^2.0.2"
+	},
     "devDependencies": {
         "@babel/core": "^7.4.3",
         "@babel/preset-env": "^7.4.3",
@@ -30,8 +36,8 @@
         "less": "^4.2.0",
         "less-loader": "^7.3.0",
         "mini-css-extract-plugin": "^0.5.0",
-        "quill": "2.0.2",
         "prettier": "^2.8.8",
+        "quill": "^2.0.2",
         "style-loader": "^0.23.1",
         "url-loader": "^1.1.2",
         "webpack": "^4.29.6",

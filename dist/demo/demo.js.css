@@ -1,132 +1,258 @@
-.ql-container .qlbt-selection-line.qlbt-selection-line-left::before {
-  position: absolute;
-  left: -2px;
-  top: -2px;
-  content: '';
-  width: 5px;
-  height: 5px;
-  background-color: #0589f3;
-  border-radius: 5px;
+.quill-table__wrapper {
+    overflow-x: auto;
 }
-.ql-container .qlbt-selection-line.qlbt-selection-line-right::before {
-  position: absolute;
-  right: -2px;
-  bottom: -3px;
-  content: '';
-  width: 5px;
-  height: 5px;
-  background-color: #0589f3;
-  border-radius: 5px;
+
+.quill-table__table {
+	box-sizing: border-box;
+    table-layout: fixed;
+    border-collapse: collapse;
 }
-.quill-better-table-wrapper {
-  overflow-x: auto;
+
+table .quill-table__cell {
+	position: relative;
+    border: 1px solid #DCDCDC;
+	padding: 2px 5px;
 }
-table.quill-better-table {
-  table-layout: fixed;
-  border-collapse: collapse;
+
+.quill-table__cell-line {
+	margin: 0;
+	padding: 0;
 }
-table.quill-better-table td {
-  border: 1px solid #000;
-  padding: 2px 5px;
+
+.quill-table__cell-line--selected *::selection {
+	background-color: transparent;
 }
-.qlbt-operation-menu {
-  background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  font-size: 14px;
-  z-index: 100;
-  overflow: hidden;
+
+.quill-table-operation-menu {
+	background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    font-size: 14px;
+    z-index: 1130;
+    overflow: hidden;
+	border: 1px solid #ebebeb;
+	padding: 4px;
+    background-color: #fff;
+    border-radius: 3px;
+    box-shadow: 0 5px 20px -5px rgba(0, 14, 66, .2);
+    box-sizing: border-box;
+    font-family: 'tfutura', Arial, sans-serif;
+    pointer-events: all;
+    -webkit-font-smoothing: subpixel-antialiased;
+    color: #000;
+	transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+    transform-origin: top left;
+
+	--quill-table-add-column-right-icon: url('data:image/svg+xml,%3Csvg%20width%3D%2218%22%20height%3D%2219%22%20viewBox%3D%220%200%2018%2019%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M15.5%204C15.5%203.44772%2015.0523%203%2014.5%203H11.1667V7.33333H15.5V4Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M15.5%2011.6667V7.33333H11.1667V11.6667H15.5Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M11.1667%2016H14.5C15.0523%2016%2015.5%2015.5523%2015.5%2015V11.6667H11.1667V16Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M6.83333%203H3.5C2.94772%203%202.5%203.44772%202.5%204V7.33333M6.83333%203V16M6.83333%203H11.1667M6.83333%2016H3.5C2.94772%2016%202.5%2015.5523%202.5%2015V11.6667M6.83333%2016H11.1667M11.1667%203H14.5C15.0523%203%2015.5%203.44772%2015.5%204V7.33333M11.1667%203V7.33333M11.1667%2016H14.5C15.0523%2016%2015.5%2015.5523%2015.5%2015V11.6667M11.1667%2016V11.6667M2.5%207.33333V11.6667M2.5%207.33333H11.1667M15.5%207.33333V11.6667M15.5%207.33333H11.1667M2.5%2011.6667H11.1667M15.5%2011.6667H11.1667M11.1667%207.33333V11.6667%22%20stroke%3D%22%23333333%22%20stroke-width%3D%220.962963%22%2F%3E%3Cpath%20d%3D%22M11.7871%209.46962H14.7888M13.288%207.96875V10.9705%22%20stroke%3D%22white%22%20stroke-width%3D%220.577778%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E');
+	--quill-table-add-column-left-icon: url('data:image/svg+xml,%3Csvg%20width%3D%2218%22%20height%3D%2219%22%20viewBox%3D%220%200%2018%2019%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M2.5%2015C2.5%2015.5523%202.94771%2016%203.5%2016L6.83333%2016L6.83333%2011.6667L2.5%2011.6667L2.5%2015Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M2.5%207.33333L2.5%2011.6667L6.83333%2011.6667L6.83333%207.33333L2.5%207.33333Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M6.83333%203L3.5%203C2.94772%203%202.5%203.44771%202.5%204L2.5%207.33333L6.83333%207.33333L6.83333%203Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M11.1667%2016L14.5%2016C15.0523%2016%2015.5%2015.5523%2015.5%2015L15.5%2011.6667M11.1667%2016L11.1667%203M11.1667%2016L6.83333%2016M11.1667%203L14.5%203C15.0523%203%2015.5%203.44771%2015.5%204L15.5%207.33333M11.1667%203L6.83333%203M6.83333%2016L3.5%2016C2.94771%2016%202.5%2015.5523%202.5%2015L2.5%2011.6667M6.83333%2016L6.83333%2011.6667M6.83333%203L3.5%203C2.94772%203%202.5%203.44771%202.5%204L2.5%207.33333M6.83333%203L6.83333%207.33333M15.5%2011.6667L15.5%207.33333M15.5%2011.6667L6.83333%2011.6667M2.5%2011.6667L2.5%207.33333M2.5%2011.6667L6.83333%2011.6667M15.5%207.33333L6.83333%207.33333M2.5%207.33333L6.83333%207.33333M6.83333%2011.6667L6.83333%207.33333%22%20stroke%3D%22%23333333%22%20stroke-width%3D%220.962963%22%2F%3E%3Cpath%20d%3D%22M6.21289%209.53038L3.21115%209.53038M4.71202%2011.0312L4.71202%208.02951%22%20stroke%3D%22white%22%20stroke-width%3D%220.577778%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E');
+	--quill-table-add-column-top-icon: url('data:image/svg+xml,%3Csvg%20width%3D%2218%22%20height%3D%2219%22%20viewBox%3D%220%200%2018%2019%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M3.5%203C2.94771%203%202.5%203.44771%202.5%204L2.5%207.33333L6.83333%207.33333L6.83333%203L3.5%203Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M11.1667%203L6.83333%203L6.83333%207.33333L11.1667%207.33333L11.1667%203Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M15.5%207.33333L15.5%204C15.5%203.44771%2015.0523%203%2014.5%203L11.1667%203L11.1667%207.33333L15.5%207.33333Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M2.5%2011.6667L2.5%2015C2.5%2015.5523%202.94772%2016%203.5%2016L6.83333%2016M2.5%2011.6667L15.5%2011.6667M2.5%2011.6667L2.5%207.33333M15.5%2011.6667L15.5%2015C15.5%2015.5523%2015.0523%2016%2014.5%2016L11.1667%2016M15.5%2011.6667L15.5%207.33333M2.5%207.33333L2.5%204C2.5%203.44771%202.94771%203%203.5%203L6.83333%203M2.5%207.33333L6.83333%207.33333M15.5%207.33333L15.5%204C15.5%203.44771%2015.0523%203%2014.5%203L11.1667%203M15.5%207.33333L11.1667%207.33333M6.83333%2016L11.1667%2016M6.83333%2016L6.83333%207.33333M6.83333%203L11.1667%203M6.83333%203L6.83333%207.33333M11.1667%2016L11.1667%207.33333M11.1667%203L11.1667%207.33333M6.83333%207.33333L11.1667%207.33333%22%20stroke%3D%22%23333333%22%20stroke-width%3D%220.962963%22%2F%3E%3Cpath%20d%3D%22M8.96864%206.71289L8.96864%203.71115M7.46777%205.21202L10.4695%205.21202%22%20stroke%3D%22white%22%20stroke-width%3D%220.577778%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E');
+	--quill-table-add-column-bottom-icon: url('data:image/svg+xml,%3Csvg%20width%3D%2218%22%20height%3D%2219%22%20viewBox%3D%220%200%2018%2019%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M14.5%2016C15.0523%2016%2015.5%2015.5523%2015.5%2015L15.5%2011.6667L11.1667%2011.6667L11.1667%2016L14.5%2016Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M6.83333%2016L11.1667%2016L11.1667%2011.6667L6.83333%2011.6667L6.83333%2016Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M2.5%2011.6667L2.5%2015C2.5%2015.5523%202.94771%2016%203.5%2016L6.83333%2016L6.83333%2011.6667L2.5%2011.6667Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M15.5%207.33333L15.5%204C15.5%203.44772%2015.0523%203%2014.5%203L11.1667%203M15.5%207.33333L2.5%207.33333M15.5%207.33333L15.5%2011.6667M2.5%207.33333L2.5%204C2.5%203.44771%202.94771%203%203.5%203L6.83333%203M2.5%207.33333L2.5%2011.6667M15.5%2011.6667L15.5%2015C15.5%2015.5523%2015.0523%2016%2014.5%2016L11.1667%2016M15.5%2011.6667L11.1667%2011.6667M2.5%2011.6667L2.5%2015C2.5%2015.5523%202.94771%2016%203.5%2016L6.83333%2016M2.5%2011.6667L6.83333%2011.6667M11.1667%203L6.83333%203M11.1667%203L11.1667%2011.6667M11.1667%2016L6.83333%2016M11.1667%2016L11.1667%2011.6667M6.83333%203L6.83333%2011.6667M6.83333%2016L6.83333%2011.6667M11.1667%2011.6667L6.83333%2011.6667%22%20stroke%3D%22%23333333%22%20stroke-width%3D%220.962963%22%2F%3E%3Cpath%20d%3D%22M9.03038%2012.2871L9.03038%2015.2888M10.5312%2013.788L7.52951%2013.788%22%20stroke%3D%22white%22%20stroke-width%3D%220.577778%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E');
+	--quill-table-merge-cells-icon: url('data:image/svg+xml,%3Csvg%20width%3D%2218%22%20height%3D%2218%22%20viewBox%3D%220%200%2018%2018%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M6.83333%206.83333L2.5%206.83333L2.5%2011.1667L6.83333%2011.1667L6.83333%206.83333Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M11.1667%2011.1667L11.1667%206.83333L6.83333%206.83333L6.83333%2011.1667L11.1667%2011.1667Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M15.5%2011.1667L15.5%206.83333L11.1667%206.83333L11.1667%2011.1667L15.5%2011.1667Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M15.5%206.83333L15.5%203.5C15.5%202.94772%2015.0523%202.5%2014.5%202.5L11.1667%202.5M15.5%206.83333L15.5%2011.1667M15.5%206.83333L11.1667%206.83333M2.5%206.83333L2.5%203.5C2.5%202.94771%202.94772%202.5%203.5%202.5L6.83334%202.5M2.5%206.83333L2.5%2011.1667M2.5%206.83333L6.83333%206.83333M15.5%2011.1667L15.5%2014.5C15.5%2015.0523%2015.0523%2015.5%2014.5%2015.5L11.1667%2015.5M15.5%2011.1667L11.1667%2011.1667M2.5%2011.1667L2.5%2014.5C2.5%2015.0523%202.94772%2015.5%203.5%2015.5L6.83333%2015.5M2.5%2011.1667L6.83333%2011.1667M11.1667%202.5L6.83334%202.5M11.1667%202.5L11.1667%206.83333M11.1667%2015.5L6.83333%2015.5M11.1667%2015.5L11.1667%2011.1667M6.83334%202.5L6.83333%206.83333M6.83333%2015.5L6.83333%2011.1667M11.1667%2011.1667L6.83333%2011.1667M11.1667%2011.1667L11.1667%206.83333M6.83333%2011.1667L6.83333%206.83333M6.83333%206.83333L11.1667%206.83333%22%20stroke%3D%22%23333333%22%20stroke-width%3D%220.962963%22%2F%3E%3C%2Fsvg%3E');
+	--quill-table-slpit-cells-icon: url('data:image/svg+xml,%3Csvg%20width%3D%2218%22%20height%3D%2219%22%20viewBox%3D%220%200%2018%2019%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M6.83333%206.88216L2.5%206.88216L2.5%2011.2155L6.83333%2011.2155L6.83333%206.88216Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M15.5%2011.2155L15.5%206.88216L11.1667%206.88216L11.1667%2011.2155L15.5%2011.2155Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M15.5%206.88216L15.5%203.54883C15.5%202.99654%2015.0523%202.54883%2014.5%202.54883L11.1667%202.54883M15.5%206.88216L15.5%2011.2155M15.5%206.88216L11.1667%206.88216M2.5%206.88216L2.5%203.54883C2.5%202.99654%202.94772%202.54883%203.5%202.54883L6.83334%202.54883M2.5%206.88216L2.5%2011.2155M2.5%206.88216L6.83333%206.88216M15.5%2011.2155L15.5%2014.5488C15.5%2015.1011%2015.0523%2015.5488%2014.5%2015.5488L11.1667%2015.5488M15.5%2011.2155L11.1667%2011.2155M2.5%2011.2155L2.5%2014.5488C2.5%2015.1011%202.94772%2015.5488%203.5%2015.5488L6.83333%2015.5488M2.5%2011.2155L6.83333%2011.2155M11.1667%202.54883L6.83334%202.54883M11.1667%202.54883L11.1667%206.88216M11.1667%2015.5488L6.83333%2015.5488M11.1667%2015.5488L11.1667%2011.2155M6.83334%202.54883L6.83333%206.88216M6.83333%2015.5488L6.83333%2011.2155M11.1667%2011.2155L6.83333%2011.2155M11.1667%2011.2155L11.1667%206.88216M6.83333%2011.2155L6.83333%206.88216M6.83333%206.88216L11.1667%206.88216%22%20stroke%3D%22%23333333%22%20stroke-width%3D%220.962963%22%2F%3E%3C%2Fsvg%3E');
+	--quill-table-remove-column-icon: url('data:image/svg+xml,%3Csvg%20width%3D%2218%22%20height%3D%2219%22%20viewBox%3D%220%200%2018%2019%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M11.1667%207.33333L11.1667%203L6.83334%203L6.83333%207.33333L11.1667%207.33333Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M6.83333%2011.6667L11.1667%2011.6667L11.1667%207.33333L6.83333%207.33333L6.83333%2011.6667Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M6.83333%2016L11.1667%2016L11.1667%2011.6667L6.83333%2011.6667L6.83333%2016Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M11.1667%2016L14.5%2016C15.0523%2016%2015.5%2015.5523%2015.5%2015L15.5%2011.6667M11.1667%2016L6.83333%2016M11.1667%2016L11.1667%2011.6667M11.1667%203L14.5%203C15.0523%203%2015.5%203.44772%2015.5%204L15.5%207.33333M11.1667%203L6.83334%203M11.1667%203L11.1667%207.33333M6.83333%2016L3.5%2016C2.94772%2016%202.5%2015.5523%202.5%2015L2.5%2011.6667M6.83333%2016L6.83333%2011.6667M6.83334%203L3.5%203C2.94772%203%202.5%203.44772%202.5%204L2.5%207.33333M6.83334%203L6.83333%207.33333M15.5%2011.6667L15.5%207.33333M15.5%2011.6667L11.1667%2011.6667M2.5%2011.6667L2.5%207.33333M2.5%2011.6667L6.83333%2011.6667M15.5%207.33333L11.1667%207.33333M2.5%207.33333L6.83333%207.33333M6.83333%2011.6667L6.83333%207.33333M6.83333%2011.6667L11.1667%2011.6667M6.83333%207.33333L11.1667%207.33333M11.1667%207.33333L11.1667%2011.6667%22%20stroke%3D%22%23333333%22%20stroke-width%3D%220.962963%22%2F%3E%3Cpath%20d%3D%22M7.96998%208.58081L10.0925%2010.7034M10.0925%208.58081L7.96998%2010.7034%22%20stroke%3D%22white%22%20stroke-width%3D%220.577778%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E');
+	--quill-table-remove-row-icon: url('data:image/svg+xml,%3Csvg%20width%3D%2218%22%20height%3D%2219%22%20viewBox%3D%220%200%2018%2019%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M11.4167%2011.9167L15.75%2011.9167L15.75%207.58334L11.4167%207.58334L11.4167%2011.9167Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M7.08333%207.58333L7.08333%2011.9167L11.4167%2011.9167L11.4167%207.58334L7.08333%207.58333Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M2.75%207.58333L2.75%2011.9167L7.08333%2011.9167L7.08333%207.58333L2.75%207.58333Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20d%3D%22M2.75%2011.9167L2.75%2015.25C2.75%2015.8023%203.19772%2016.25%203.75%2016.25L7.08333%2016.25M2.75%2011.9167L2.75%207.58333M2.75%2011.9167L7.08333%2011.9167M15.75%2011.9167L15.75%2015.25C15.75%2015.8023%2015.3023%2016.25%2014.75%2016.25L11.4167%2016.25M15.75%2011.9167L15.75%207.58334M15.75%2011.9167L11.4167%2011.9167M2.75%207.58333L2.75%204.25C2.75%203.69772%203.19772%203.25%203.75%203.25L7.08333%203.25M2.75%207.58333L7.08333%207.58333M15.75%207.58334L15.75%204.25C15.75%203.69772%2015.3023%203.25%2014.75%203.25L11.4167%203.25M15.75%207.58334L11.4167%207.58334M7.08333%2016.25L11.4167%2016.25M7.08333%2016.25L7.08333%2011.9167M7.08333%203.25L11.4167%203.25M7.08333%203.25L7.08333%207.58333M11.4167%2016.25L11.4167%2011.9167M11.4167%203.25L11.4167%207.58334M7.08333%207.58333L11.4167%207.58334M7.08333%207.58333L7.08333%2011.9167M11.4167%207.58334L11.4167%2011.9167M11.4167%2011.9167L7.08333%2011.9167%22%20stroke%3D%22%23333333%22%20stroke-width%3D%220.962963%22%2F%3E%3Cpath%20d%3D%22M10.1692%208.71998L8.04665%2010.8425M10.1692%2010.8425L8.04665%208.71998%22%20stroke%3D%22white%22%20stroke-width%3D%220.577778%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E');
+	--quill-table-delete-table-icon: url('data:image/svg+xml,%3Csvg%20width%3D%2218%22%20height%3D%2219%22%20viewBox%3D%220%200%2018%2019%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M7.2832%203.5H10.7118V4.35645H14.1431V6.07073H3.85742V4.35645H7.2832V3.5Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M4.71582%206.9292H13.2872V15.5006H4.71582V6.9292ZM6.85477%2013.7864L6.85477%208.64355H7.71191L7.71191%2013.7864H6.85477ZM8.57059%208.64355L8.57059%2013.7864H9.42773V8.64355H8.57059ZM10.2874%2013.7864V8.64355H11.1445V13.7864H10.2874Z%22%20fill%3D%22%23333333%22%2F%3E%3C%2Fsvg%3E');
 }
-.qlbt-operation-menu .qlbt-operation-menu-dividing {
-  height: 1px;
-  background-color: #efefef;
+
+.quill-table-operation-menu__divider {
+	height: 1px;
+    background-color: #efefef;
 }
-.qlbt-operation-menu .qlbt-operation-menu-subtitle {
-  color: #999;
-  font-size: 14px;
-  padding: 5px 16px;
+
+.quill-table-operation-menu__subtitle {
+    color: #999;
+    font-size: 14px;
+    padding: 5px 16px;
 }
-.qlbt-operation-menu .qlbt-operation-color-picker {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 0 16px 10px;
-  background-color: #fff;
-  overflow: hidden;
+
+.quill-table-operation-menu__item {
+	display: flex;
+    align-items: center;
+    padding: 6px 10px;
+	font-size: 15px;
+    font-weight: 300;
+    line-height: 20px;
+    border-radius: 2px;
+    overflow: hidden;
+    background-color: #fff;
+    cursor: pointer;
+    text-overflow: ellipsis;
 }
-.qlbt-operation-menu .qlbt-operation-color-picker .qlbt-operation-color-picker-item {
-  width: 20px;
-  height: 20px;
-  border: 1px solid #595959;
-  margin-right: 5px;
-  margin-bottom: 5px;
-  cursor: pointer;
+
+.quill-table-operation-menu__item:hover {
+	color: #fff;
+    background-color: #fa8669;
 }
-.qlbt-operation-menu .qlbt-operation-menu-item {
-  display: flex;
-  align-items: center;
-  padding: 10px 16px;
-  background-color: #fff;
-  cursor: pointer;
-  color: #595959;
-  overflow: hidden;
-  text-overflow: ellipsis;
+
+.quill-table-operation-menu__icon {
+	margin-right: 8px;
+    height: 20px;
+    width: 20px;
+    font-size: 0;
 }
-.qlbt-operation-menu .qlbt-operation-menu-item:hover {
-  background-color: #efefef;
+
+.quill-table-operation-menu__item:hover .quill-table-operation-menu__icon {
+	filter: invert(100%) brightness(140%);
 }
-.qlbt-operation-menu .qlbt-operation-menu-item .qlbt-operation-menu-icon {
-  margin-right: 8px;
-  height: 20px;
-  width: 20px;
-  font-size: 0;
+
+.quill-table-operation-menu__icon-add-column-right {
+	background-image: var(--quill-table-add-column-right-icon);
 }
-.qlbt-col-tool {
-  position: absolute;
-  display: flex;
-  align-items: flex-end;
-  overflow: hidden;
-  z-index: 99;
-  height: 16px;
+
+.quill-table-operation-menu__icon-add-column-left {
+	background-image: var(--quill-table-add-column-left-icon);
 }
-.qlbt-col-tool .qlbt-col-tool-cell {
-  position: relative;
-  background-color: #fff;
-  border-top: 1px solid #000;
-  border-right: 1px solid #000;
-  border-bottom: 1px solid #000;
+
+.quill-table-operation-menu__icon-add-column-left {
+	background-image: var(--quill-table-add-column-left-icon);
 }
-.qlbt-col-tool .qlbt-col-tool-cell:first-child {
-  border-left: 1px solid #000;
+
+.quill-table-operation-menu__icon-add-column-top {
+	background-image: var(--quill-table-add-column-top-icon);
 }
-.qlbt-col-tool .qlbt-col-tool-cell-holder {
-  position: absolute;
-  right: -1px;
-  top: 0;
-  bottom: 0;
-  z-index: 3;
-  width: 1px;
-  background-color: transparent;
-  cursor: ew-resize;
+
+.quill-table-operation-menu__icon-add-column-bottom {
+	background-image: var(--quill-table-add-column-bottom-icon);
 }
-.qlbt-col-tool .qlbt-col-tool-cell-holder:hover {
-  background-color: #0589f3;
+
+.quill-table-operation-menu__icon-merge-cells {
+	background-image: var(--quill-table-merge-cells-icon);
 }
-.qlbt-col-tool .qlbt-col-tool-cell-holder::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -6px;
-  display: block;
-  width: 8px;
-  height: 100%;
+
+.quill-table-operation-menu__icon-slpit-cells {
+	background-image: var(--quill-table-slpit-cells-icon);
 }
-.qlbt-col-tool .qlbt-col-tool-cell-holder::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: -6px;
-  display: block;
-  width: 8px;
-  height: 100%;
+
+.quill-table-operation-menu__icon-remove-column {
+	background-image: var(--quill-table-remove-column-icon);
+}
+
+.quill-table-operation-menu__icon-remove-row {
+	background-image: var(--quill-table-remove-row-icon);
+}
+
+.quill-table-operation-menu__icon-delete-table {
+	background-image: var(--quill-table-delete-table-icon);
+}
+
+.quill-table-operation-menu__context-btn {
+	box-sizing: border-box;
+	position: absolute;
+	width: 12px;
+	height: 20px;
+	cursor: pointer;
+	border: 0;
+	border-radius: 2px;
+	opacity: 1;
+	background-color: #3C87EB;
+	background-image: url("data:image/svg+xml,%3Csvg%20width%3D%223%22%20height%3D%2213%22%20viewBox%3D%220%200%203%2013%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Ccircle%20cx%3D%221.5%22%20cy%3D%221.5%22%20r%3D%221.5%22%20fill%3D%22white%22%2F%3E%3Ccircle%20cx%3D%221.5%22%20cy%3D%226.5%22%20r%3D%221.5%22%20fill%3D%22white%22%2F%3E%3Ccircle%20cx%3D%221.5%22%20cy%3D%2211.5%22%20r%3D%221.5%22%20fill%3D%22white%22%2F%3E%3C%2Fsvg%3E");
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.quill-table-color-picker {
+	display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 0 16px 10px;
+    background-color: #fff;
+    overflow: hidden;
+}
+
+.quill-table-color-picker__item {
+	width: 20px;
+    height: 20px;
+    border: 1px solid #595959;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.quill-table-col-tool {
+	position: absolute;
+    display: flex;
+	box-sizing: border-box;
+    align-items: flex-end;
+    overflow: hidden;
+    z-index: 8;
+}
+
+.quill-table-col-tool__cell {
+	position: relative;
+    background-color: #fff;
+    border-top: 1px solid #F2F2F2;
+    border-right: 1px solid #F2F2F2;
+    border-bottom: 1px solid #F2F2F2;
+	background-color: #DCDCDC;
+}
+
+.quill-table-col-tool__cell:first-child {
+	border-left: 1px solid #F2F2F2;
+}
+
+.quill-table-col-tool__cell-holder {
+	position: absolute;
+    right: -1px;
+    top: 0;
+    bottom: 0;
+    z-index: 3;
+    width: 1px;
+    background-color: #808080;
+    cursor: col-resize;
+	touch-action: none;
+}
+
+.quill-table-col-tool__cell:last-child .quill-table-col-tool__cell-holder {
+    display: none;
+    pointer-events: none;
+}
+
+.quill-table-col-tool__cell-holder:hover {
+    background-color: #3C87EB;
+}
+
+.quill-table-col-tool__cell-holder::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -6px;
+    display: block;
+    width: 8px;
+    height: 100%;
+}
+
+.quill-table-col-tool__cell-holder::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -6px;
+    display: block;
+    width: 8px;
+    height: 100%;
+}
+
+.quill-table__selection-line {
+    z-index: 9;
+}
+
+.quill-table__selection-line.quill-table__selection-line-left::before {
+    position: absolute;
+    left: -2px;
+    top: -2px;
+    content: '';
+    width: 5px;
+    height: 5px;
+    background-color: #3C87EB;
+    border-radius: 5px;
+}
+
+.quill-table__selection-line.quill-table__selection-line-right::before {
+    position: absolute;
+    right: -2px;
+    bottom: -3px;
+    content: '';
+    width: 5px;
+    height: 5px;
+    background-color: #3C87EB;
+    border-radius: 5px;
 }
 

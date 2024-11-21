@@ -1,6 +1,6 @@
 import QuillTable from '../../src/quill-table';
 // import better-table styles file
-import 'src/assets/quill-table.less';
+import 'src/assets/quill-table.css';
 
 Quill.register(
     {
@@ -14,19 +14,8 @@ window.onload = () => {
         theme: 'snow',
         modules: {
             table: false,
-            'quill-table': {
-                operationMenu: {
-                    items: {
-                        unmergeCells: {
-                            text: 'Another unmerge cells name',
-                        },
-                    },
-
-                    color: {
-                        colors: ['red', 'green', 'yellow', 'white', 'gold', 'cadetblue', 'darkseagreen', 'skyblue'],
-                    },
-                },
-            },
+            'quill-table': true,
+            toolbar: [['bold', 'italic', 'underline', {align: ''}, {align: 'center'}, {align: 'right'}]],
             keyboard: {
                 bindings: QuillTable.keyboardBindings,
             },
@@ -35,7 +24,7 @@ window.onload = () => {
 
     let tableModule = quill.getModule('quill-table');
     document.body.querySelector('#insert-table').onclick = () => {
-        tableModule.insertTable(3, 3);
+        tableModule.insertTable(12, 8);
     };
 
     document.body.querySelector('#get-table').onclick = () => {
