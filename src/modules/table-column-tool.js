@@ -240,6 +240,16 @@ export default class TableColumnTool {
 
         if ($holder !== null) {
             $holder.addEventListener('mousedown', handleMousedown, false);
+            ['dragstart', 'dragenter', 'ondragover', 'drag', 'drop'].forEach(eventName => {
+                $holder.addEventListener(
+                    eventName,
+                    e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    },
+                    false
+                );
+            });
             if (this.isTouchDevice) {
                 $holder.addEventListener('touchstart', handleMousedown, false);
             }
