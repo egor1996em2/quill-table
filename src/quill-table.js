@@ -138,6 +138,18 @@ class QuillTable extends Module {
             false
         );
 
+        this.quill.root.addEventListener('mousemove', evt => {
+            if (
+                !evt.target.closest('table') ||
+                (this.tableSelection && (this.tableSelection.dragging || this.tableSelection.selectedTds.length > 0))
+            ) {
+                return;
+            }
+
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+        });
+
         // add keyboard binding：Backspace
         // prevent user hits backspace to delete table cell
         // const KeyBoard = quill.getModule('keyboard');
