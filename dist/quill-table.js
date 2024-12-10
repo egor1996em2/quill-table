@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "eda65c6ce81a4889c06c";
+/******/ 	var hotCurrentHash = "a50ec0d5ef471b810591";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -1099,18 +1099,40 @@ class table_column_tool_TableColumnTool {
     let tableRect = {};
     let cellRect = {};
     let $helpLine = null;
+    let previousLeftPosition = 0;
     const handleDrag = e => {
       e.preventDefault();
       if (dragging) {
         x = this.getClientXFromEvent(e);
+        let prevDelta = delta;
         if (width0 + x - x0 >= CELL_MIN_WIDTH) {
           delta = x - x0;
         } else {
           delta = CELL_MIN_WIDTH - width0;
         }
+        let helplineLeftPosition = cellRect.left + cellRect.width - 1 + delta;
+        const nextCol = $holder.parentNode.nextSibling;
+        if (!nextCol) {
+          css($helpLine, {
+            left: `${helplineLeftPosition}px`
+          });
+          previousLeftPosition = helplineLeftPosition;
+        }
+        const {
+          left,
+          width
+        } = nextCol.getBoundingClientRect();
+        if (width + left - helplineLeftPosition > CELL_MIN_WIDTH) {
+          css($helpLine, {
+            left: `${helplineLeftPosition}px`
+          });
+          previousLeftPosition = helplineLeftPosition;
+          return;
+        }
         css($helpLine, {
-          left: `${cellRect.left + cellRect.width - 1 + delta}px`
+          left: `${previousLeftPosition}px`
         });
+        delta = prevDelta;
       }
     };
     const handleMouseup = e => {
@@ -1173,6 +1195,12 @@ class table_column_tool_TableColumnTool {
     };
     if ($holder !== null) {
       $holder.addEventListener('mousedown', handleMousedown, false);
+      ['dragstart', 'dragenter', 'ondragover', 'drag', 'drop'].forEach(eventName => {
+        $holder.addEventListener(eventName, e => {
+          e.preventDefault();
+          e.stopPropagation();
+        }, false);
+      });
       if (this.isTouchDevice) {
         $holder.addEventListener('touchstart', handleMousedown, false);
       }
@@ -3078,6 +3106,13 @@ class quill_table_QuillTable extends Module {
       }
       this.showTableOperationMenu(tableNode, rowNode, cellNode, evt);
     }, false);
+    this.quill.root.addEventListener('mousemove', evt => {
+      if (!evt.target.closest('table') || this.tableSelection && (this.tableSelection.dragging || this.tableSelection.selectedTds.length > 0)) {
+        return;
+      }
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+    });
 
     // add keyboard binding：Backspace
     // prevent user hits backspace to delete table cell
@@ -3363,7 +3398,7 @@ quill_table_QuillTable.keyboardBindings = {
     format: ['table-cell-line'],
     handler(range, context) {
       // bugfix: a unexpected new line inserted when user compositionend with hitting Enter
-      if (this.quill.selection && this.quill.selection.composing) return;
+      if (this.quill.selection && this.quill.selection.composing || this.quill.container.querySelectorAll('.quill-table__cell-line--selected').length > 1) return;
       const Scope = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.imports.parchment.Scope;
       if (range.length > 0) {
         this.quill.scroll.deleteAt(range.index, range.length); // So we do not trigger text-change
