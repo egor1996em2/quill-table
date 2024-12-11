@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "a50ec0d5ef471b810591";
+/******/ 	var hotCurrentHash = "0a4a9d566359b6e243b4";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -3107,7 +3107,7 @@ class quill_table_QuillTable extends Module {
       this.showTableOperationMenu(tableNode, rowNode, cellNode, evt);
     }, false);
     this.quill.root.addEventListener('mousemove', evt => {
-      if (!evt.target.closest('table') || this.tableSelection && (this.tableSelection.dragging || this.tableSelection.selectedTds.length > 0)) {
+      if (!evt.target.closest('table') || this.tableSelection && (this.tableSelection.dragging || this.tableSelection.selectedTds && this.tableSelection.selectedTds.length > 0)) {
         return;
       }
       const selection = window.getSelection();
