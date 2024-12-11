@@ -1,8 +1,9 @@
 {
     "name": "@tilda/quill-table",
-    "version": "1.8.1",
+    "version": "1.9.0",
     "description": "Модуль редактора Quill с поддержкой таблиц и функций их редактирования",
     "main": "dist/quill-table.js",
+    "style": "dist/index.css",
     "scripts": {
         "dev": "webpack-dev-server --config webpack.config.js --mode=development",
         "build": "npm run build:normal && npm run build:minimize",
@@ -13,7 +14,7 @@
     },
 	"exports": {
 		".": "./dist/quill-table.js",
-		"./style.css": "./dist/quill-table.css"
+		"./style.css": "./dist/index.css"
 	},
     "repository": {
         "type": "git",
