@@ -141,7 +141,9 @@ class QuillTable extends Module {
         this.quill.root.addEventListener('mousemove', evt => {
             if (
                 !evt.target.closest('table') ||
-                (this.tableSelection && (this.tableSelection.dragging || this.tableSelection.selectedTds.length > 0))
+                (this.tableSelection &&
+                    (this.tableSelection.dragging ||
+                        (this.tableSelection.selectedTds && this.tableSelection.selectedTds.length > 0)))
             ) {
                 return;
             }
