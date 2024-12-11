@@ -125,6 +125,7 @@ export default class TableColumnTool {
         let tableRect = {};
         let cellRect = {};
         let $helpLine = null;
+        let previousLeftPosition = 0;
 
         const handleDrag = e => {
             e.preventDefault();
@@ -132,15 +133,39 @@ export default class TableColumnTool {
             if (dragging) {
                 x = this.getClientXFromEvent(e);
 
+                let prevDelta = delta;
+
                 if (width0 + x - x0 >= CELL_MIN_WIDTH) {
                     delta = x - x0;
                 } else {
                     delta = CELL_MIN_WIDTH - width0;
                 }
 
+                let helplineLeftPosition = cellRect.left + cellRect.width - 1 + delta;
+
+                const nextCol = $holder.parentNode.nextSibling;
+
+                if (!nextCol) {
+                    css($helpLine, {
+                        left: `${helplineLeftPosition}px`,
+                    });
+                    previousLeftPosition = helplineLeftPosition;
+                }
+
+                const {left, width} = nextCol.getBoundingClientRect();
+
+                if (width + left - helplineLeftPosition > CELL_MIN_WIDTH) {
+                    css($helpLine, {
+                        left: `${helplineLeftPosition}px`,
+                    });
+                    previousLeftPosition = helplineLeftPosition;
+                    return;
+                }
+
                 css($helpLine, {
-                    left: `${cellRect.left + cellRect.width - 1 + delta}px`,
+                    left: `${previousLeftPosition}px`,
                 });
+                delta = prevDelta;
             }
         };
 
@@ -212,8 +237,19 @@ export default class TableColumnTool {
             width0 = cellRect.width;
             $holder.classList.add('dragging');
         };
+
         if ($holder !== null) {
             $holder.addEventListener('mousedown', handleMousedown, false);
+            ['dragstart', 'dragenter', 'ondragover', 'drag', 'drop'].forEach(eventName => {
+                $holder.addEventListener(
+                    eventName,
+                    e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    },
+                    false
+                );
+            });
             if (this.isTouchDevice) {
                 $holder.addEventListener('touchstart', handleMousedown, false);
             }
