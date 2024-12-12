@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "0a4a9d566359b6e243b4";
+/******/ 	var hotCurrentHash = "07d44ab4f139f3220275";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -864,7 +864,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return hotCreateRequire(4)(__webpack_require__.s = 4);
+/******/ 	return hotCreateRequire(5)(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -3586,14 +3586,15 @@ function isTableCellLine(current) {
 
 /***/ }),
 /* 3 */,
-/* 4 */
+/* 4 */,
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _src_quill_table__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
-/* harmony import */ var src_assets_quill_table_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2);
-/* harmony import */ var src_assets_quill_table_css__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(src_assets_quill_table_css__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var src_assets_index_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2);
+/* harmony import */ var src_assets_index_css__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(src_assets_index_css__WEBPACK_IMPORTED_MODULE_1__);
 
 // import better-table styles file
 

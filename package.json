@@ -1,6 +1,6 @@
 {
     "name": "@tilda/quill-table",
-    "version": "1.9.0",
+    "version": "1.10.0",
     "description": "Модуль редактора Quill с поддержкой таблиц и функций их редактирования",
     "main": "dist/quill-table.js",
     "style": "dist/index.css",
@@ -14,7 +14,8 @@
     },
 	"exports": {
 		".": "./dist/quill-table.js",
-		"./style.css": "./dist/index.css"
+		"./style.css": "./dist/index.css",
+        "./style.view.css": "./dist/index-view.css"
 	},
     "repository": {
         "type": "git",

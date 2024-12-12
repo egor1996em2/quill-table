@@ -1,5 +1,7 @@
 .quill-table__wrapper {
     overflow-x: auto;
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 .quill-table__table {

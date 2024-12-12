@@ -15,7 +15,8 @@ module.exports = (env, argv) => {
     } else {
         entry = {
             'quill-table.js': ['./src/quill-table.js'],
-            'quill-table': './src/assets/quill-table.css',
+            'quill-table': './src/assets/index.css',
+            'quill-table-view': './src/assets/index-view.css',
             'demo/demo.js': './demo/js/demo.js',
         };
         minimize = false;
@@ -126,7 +127,7 @@ module.exports = (env, argv) => {
             }),
 
             new MiniCssExtractPlugin({
-                filename: 'index.css',
+                filename: '[name].css',
                 chunkFilename: '[name].[id].css',
             }),
 

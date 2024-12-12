@@ -1,5 +1,7 @@
 .quill-table__wrapper {
     overflow-x: auto;
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 .quill-table__table {
@@ -255,3 +257,4 @@ table .quill-table__cell {
     background-color: #3C87EB;
     border-radius: 5px;
 }
+
