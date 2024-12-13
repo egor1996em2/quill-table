@@ -203,7 +203,7 @@ class QuillTable extends Module {
             }
         });
 
-        this.resizeObserver.observe(document.body);
+        this.resizeObserver.observe(this.quill.root);
     }
 
     getTable(range = this.quill.getSelection()) {
