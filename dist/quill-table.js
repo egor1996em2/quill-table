@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "701c56f476e23b864c83";
+/******/ 	var hotCurrentHash = "493d63ccd7195e3669d3";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -2263,6 +2263,9 @@ class table_selection_TableSelection {
   }
   highlitSelection(target) {
     const startTd = target.closest('td[data-row]');
+    if (!startTd) {
+      return;
+    }
     const startTdRect = getRelativeRect(startTd.getBoundingClientRect(), this.quill.root.parentNode);
     this.boundary = computeBoundaryFromRects(startTdRect, startTdRect);
     this.correctBoundary();
@@ -3156,7 +3159,7 @@ class quill_table_QuillTable extends Module {
         this.tableSelection.refreshHelpLinesPosition();
       }
     });
-    this.resizeObserver.observe(document.body);
+    this.resizeObserver.observe(this.quill.root);
   }
   getTable(range = this.quill.getSelection()) {
     if (range == null) return [null, null, null, -1];
