@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "d74c211812afdb8ccac6";
+/******/ 	var hotCurrentHash = "701c56f476e23b864c83";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -2190,27 +2190,26 @@ class table_selection_TableSelection {
   }
   mouseDownHandler(e) {
     if (e.button !== 0 || !e.target.closest('.quill-table__table')) return;
+    const selectionStart = this.highlitSelection(e.target);
+    if (!selectionStart) {
+      return;
+    }
     let mouseLeaveTimeout = null;
     this.quill.root.addEventListener('mousemove', mouseMoveHandler, false);
-    this.quill.root.addEventListener('mouseup', mouseUpHandler, false);
+    document.addEventListener('mouseup', mouseUpHandler, false);
     this.quill.root.addEventListener('mouseleave', mouseLeaveHandler, false);
     const selectedCells = this.table.querySelectorAll('.quill-table__cell-line--selected');
     let endTd;
     selectedCells.forEach(cell => {
       cell.classList.remove('quill-table__cell-line--selected');
     });
-    const selectionLines = this.quill.root.parentNode.querySelectorAll('.quill-table__selection-line');
-    selectionLines.forEach(selectionLine => {
-      selectionLine.addEventListener('mouseup', mouseUpHandler, false);
-    });
     const self = this;
     this.dragging = true;
-    const {
-      startTd,
-      startTdRect
-    } = this.highlitSelection(e.target);
     function mouseMoveHandler(e) {
       if (e.button !== 0 || !e.target.closest('.quill-table__table')) return;
+      if (!selectionStart) {
+        return;
+      }
       if (mouseLeaveTimeout) {
         clearTimeout(mouseLeaveTimeout);
       }
@@ -2219,16 +2218,16 @@ class table_selection_TableSelection {
         return;
       }
       const endTdRect = getRelativeRect(endTd.getBoundingClientRect(), self.quill.root.parentNode);
-      self.boundary = computeBoundaryFromRects(startTdRect, endTdRect);
+      self.boundary = computeBoundaryFromRects(selectionStart.startTdRect, endTdRect);
       self.correctBoundary();
-      self.selectedTds = self.computeSelectedTds(startTd, endTd);
+      self.selectedTds = self.computeSelectedTds(selectionStart.startTd, endTd);
       setTimeout(() => {
         self.refreshHelpLinesPosition();
         self.showContextMenuButton(endTd);
       }, 0);
 
       // avoid select text in multiple table-cell
-      if (startTd !== endTd) {
+      if (selectionStart.startTd !== endTd) {
         self.quill.blur();
       }
     }
@@ -2237,14 +2236,15 @@ class table_selection_TableSelection {
         clearTimeout(mouseLeaveTimeout);
       }
       self.quill.root.removeEventListener('mousemove', mouseMoveHandler, false);
-      self.quill.root.removeEventListener('mouseup', mouseUpHandler, false);
+      document.removeEventListener('mouseup', mouseUpHandler, false);
       self.quill.root.removeEventListener('mouseleave', mouseLeaveHandler, false);
-      selectionLines.forEach(selectionLine => {
-        selectionLine.removeEventListener('mouseup', mouseUpHandler, false);
-      });
       self.dragging = false;
       self.selectCell();
-      self.showContextMenuButton(endTd || startTd);
+      const targetTd = endTd || selectionStart.startTd;
+      if (!targetTd) {
+        return;
+      }
+      self.showContextMenuButton(targetTd);
     }
     function mouseLeaveHandler(evt) {
       if (!self.dragging) {
@@ -3147,7 +3147,7 @@ class quill_table_QuillTable extends Module {
     this.quill.on('selection-change', range => {
       this.correctSelection(range);
     });
-    window.addEventListener('resize', () => {
+    this.resizeObserver = new window.ResizeObserver(() => {
       if (this.columnTool) {
         this.columnTool.updateToolCells();
         this.columnTool.updateToolWidth();
@@ -3155,7 +3155,8 @@ class quill_table_QuillTable extends Module {
       if (this.tableSelection) {
         this.tableSelection.refreshHelpLinesPosition();
       }
-    }, false);
+    });
+    this.resizeObserver.observe(document.body);
   }
   getTable(range = this.quill.getSelection()) {
     if (range == null) return [null, null, null, -1];
@@ -3279,6 +3280,7 @@ class quill_table_QuillTable extends Module {
   deleteTable() {
     const tableContainer = external_commonjs_quill_commonjs2_quill_amd_quill_root_Quill_default.a.find(this.table);
     tableContainer.tableDestroy();
+    this.resizeObserver.disconnect();
   }
   showTableTools(table, rowNode, cellNode, quill, options) {
     this.table = table;
