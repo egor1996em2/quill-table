@@ -157,6 +157,11 @@ export default class TableSelection {
 
     highlitSelection(target) {
         const startTd = target.closest('td[data-row]');
+
+        if (!startTd) {
+            return;
+        }
+
         const startTdRect = getRelativeRect(startTd.getBoundingClientRect(), this.quill.root.parentNode);
         this.boundary = computeBoundaryFromRects(startTdRect, startTdRect);
         this.correctBoundary();
