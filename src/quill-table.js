@@ -192,20 +192,18 @@ class QuillTable extends Module {
             this.correctSelection(range);
         });
 
-        window.addEventListener(
-            'resize',
-            () => {
-                if (this.columnTool) {
-                    this.columnTool.updateToolCells();
-                    this.columnTool.updateToolWidth();
-                }
+        this.resizeObserver = new window.ResizeObserver(() => {
+            if (this.columnTool) {
+                this.columnTool.updateToolCells();
+                this.columnTool.updateToolWidth();
+            }
 
-                if (this.tableSelection) {
-                    this.tableSelection.refreshHelpLinesPosition();
-                }
-            },
-            false
-        );
+            if (this.tableSelection) {
+                this.tableSelection.refreshHelpLinesPosition();
+            }
+        });
+
+        this.resizeObserver.observe(document.body);
     }
 
     getTable(range = this.quill.getSelection()) {
@@ -373,6 +371,7 @@ class QuillTable extends Module {
     deleteTable() {
         const tableContainer = Quill.find(this.table);
         tableContainer.tableDestroy();
+        this.resizeObserver.disconnect();
     }
 
     showTableTools(table, rowNode, cellNode, quill, options) {
