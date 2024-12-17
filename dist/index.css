@@ -5,6 +5,7 @@
 }
 
 .quill-table__table {
+	width: 100%;
 	box-sizing: border-box;
     table-layout: fixed;
     border-collapse: collapse;
