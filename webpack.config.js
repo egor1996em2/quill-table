@@ -15,7 +15,8 @@ module.exports = (env, argv) => {
     } else {
         entry = {
             'quill-table.js': ['./src/quill-table.js'],
-            'quill-table': './src/assets/quill-table.css',
+            index: './src/assets/index.css',
+            'index-view': './src/assets/index-view.css',
             'demo/demo.js': './demo/js/demo.js',
         };
         minimize = false;

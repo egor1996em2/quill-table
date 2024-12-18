@@ -1,8 +1,11 @@
 .quill-table__wrapper {
     overflow-x: auto;
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 .quill-table__table {
+	width: 100%;
 	box-sizing: border-box;
     table-layout: fixed;
     border-collapse: collapse;

@@ -1,23 +1,4 @@
-.quill-table__wrapper {
-    overflow-x: auto;
-}
-
-.quill-table__table {
-	box-sizing: border-box;
-    table-layout: fixed;
-    border-collapse: collapse;
-}
-
-table .quill-table__cell {
-	position: relative;
-    border: 1px solid #DCDCDC;
-	padding: 2px 5px;
-}
-
-.quill-table__cell-line {
-	margin: 0;
-	padding: 0;
-}
+@import './index-view.css';
 
 .quill-table__cell-line--selected *::selection {
 	background-color: transparent;

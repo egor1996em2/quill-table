@@ -138,6 +138,20 @@ class QuillTable extends Module {
             false
         );
 
+        this.quill.root.addEventListener('mousemove', evt => {
+            if (
+                !evt.target.closest('table') ||
+                (this.tableSelection &&
+                    (this.tableSelection.dragging ||
+                        (this.tableSelection.selectedTds && this.tableSelection.selectedTds.length > 0)))
+            ) {
+                return;
+            }
+
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+        });
+
         // add keyboard binding：Backspace
         // prevent user hits backspace to delete table cell
         // const KeyBoard = quill.getModule('keyboard');
@@ -178,20 +192,18 @@ class QuillTable extends Module {
             this.correctSelection(range);
         });
 
-        window.addEventListener(
-            'resize',
-            () => {
-                if (this.columnTool) {
-                    this.columnTool.updateToolCells();
-                    this.columnTool.updateToolWidth();
-                }
+        this.resizeObserver = new window.ResizeObserver(() => {
+            if (this.columnTool) {
+                this.columnTool.updateToolCells();
+                this.columnTool.updateToolWidth();
+            }
 
-                if (this.tableSelection) {
-                    this.tableSelection.refreshHelpLinesPosition();
-                }
-            },
-            false
-        );
+            if (this.tableSelection) {
+                this.tableSelection.refreshHelpLinesPosition();
+            }
+        });
+
+        this.resizeObserver.observe(this.quill.root);
     }
 
     getTable(range = this.quill.getSelection()) {
@@ -359,6 +371,7 @@ class QuillTable extends Module {
     deleteTable() {
         const tableContainer = Quill.find(this.table);
         tableContainer.tableDestroy();
+        this.resizeObserver.disconnect();
     }
 
     showTableTools(table, rowNode, cellNode, quill, options) {
@@ -523,7 +536,11 @@ QuillTable.keyboardBindings = {
         format: ['table-cell-line'],
         handler(range, context) {
             // bugfix: a unexpected new line inserted when user compositionend with hitting Enter
-            if (this.quill.selection && this.quill.selection.composing) return;
+            if (
+                (this.quill.selection && this.quill.selection.composing) ||
+                this.quill.container.querySelectorAll('.quill-table__cell-line--selected').length > 1
+            )
+                return;
             const Scope = Quill.imports.parchment.Scope;
             if (range.length > 0) {
                 this.quill.scroll.deleteAt(range.index, range.length); // So we do not trigger text-change
