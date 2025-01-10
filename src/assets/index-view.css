@@ -15,6 +15,7 @@ table .quill-table__cell {
 	position: relative;
     border: 1px solid #DCDCDC;
 	padding: 2px 5px;
+	word-wrap: break-word;
 }
 
 .quill-table__cell-line {
